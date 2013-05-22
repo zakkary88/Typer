@@ -7,15 +7,15 @@ package dataBase;
 import javax.swing.DefaultListModel;
 
 /**
- *
+ *          KLASA DA WYWALENIA PRAWDOPODOBNIE !!!!!!!!!!!!!
  * @author Marcin
  */
 public class CurrentEvents extends javax.swing.JPanel {
     
-    // kolejne niepotrzebne polaczenie !!!!!!!!!!!!!
-    DataFromDB dataFromDB = new DataFromDB();
+    private DataFromDB dataFromDB = new DataFromDB();
     
     private DefaultListModel listModelTodayBets = new DefaultListModel();
+    private DefaultListModel listModelEndedBetsToUpdate = new DefaultListModel();
     
     public CurrentEvents() {
         initComponents();
@@ -27,6 +27,7 @@ public class CurrentEvents extends javax.swing.JPanel {
     private void setFields()
     {
         jLabel1.setText("Today events:");
+        jLabel2.setText("Ended events to update:");
     }
     
     private void fillLists()
@@ -34,6 +35,10 @@ public class CurrentEvents extends javax.swing.JPanel {
         for(Bet b : dataFromDB.getTodayBets())
             listModelTodayBets.addElement(b);
         jListTodayEvents.setModel(listModelTodayBets);
+        
+        for(Bet b : dataFromDB.getEndedBetsToUpdate())
+            listModelEndedBetsToUpdate.addElement(b);
+        jListEventsEndedToUpdate.setModel(listModelEndedBetsToUpdate);
     }
 
     /**
@@ -48,10 +53,17 @@ public class CurrentEvents extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jListTodayEvents = new javax.swing.JList();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jListEventsEndedToUpdate = new javax.swing.JList();
 
         jLabel1.setText("jLabel1");
 
         jScrollPane1.setViewportView(jListTodayEvents);
+
+        jLabel2.setText("jLabel2");
+
+        jScrollPane2.setViewportView(jListEventsEndedToUpdate);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -60,23 +72,34 @@ public class CurrentEvents extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addContainerGap(328, Short.MAX_VALUE))
+                    .addComponent(jLabel1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 121, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(47, 47, 47))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(204, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JList jListEventsEndedToUpdate;
     private javax.swing.JList jListTodayEvents;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }

@@ -18,7 +18,7 @@ public class Bet {
     protected String date;
     protected double odd;
     protected double stake;
-    protected int betStatus;     // np. /-1 blad / 1 nierozstrzygniety / 2 wygrany / 3 przegrany
+    protected int betStatus;     // /-1 blad / 1 nierozstrzygniety / 2 wygrany / 3 przegrany / 4 odwołany
     protected String bukmacher;
     protected String note;
     protected String type;

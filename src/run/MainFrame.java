@@ -8,7 +8,6 @@ import coverbooker.CoverBooker;
 import dataBase.BetsManager;
 import progressivebooker.ProgressiveBooker;
 import dataBase.ConnectionManager;
-import dataBase.CurrentEvents;
 import dataBase.NewBet;
 import dataBase.QueryManager;
 
@@ -26,32 +25,30 @@ public class MainFrame extends javax.swing.JFrame {
     private CoverBooker coverBooker = null;
     private ProgressiveBooker progressiveBooker = null;
     private NewBet newBet = null;
-    private CurrentEvents currentEvents = null;
+    //private CurrentEvents currentEvents = null;
     
     
     public MainFrame() {
         initComponents();
         
         this.setTitle("Typer");
-        
+              
         connectionManager = new ConnectionManager();
         queryManager = new QueryManager(connectionManager.getConnection());
+        //queryManager = new QueryManager();
         
-        //betsManager = new BetsManager(queryManager);
         betsManager = new BetsManager();
-        //newBet = new NewBet(queryManager);
-        //newBet = new NewBet(connectionManager.getConnection());
         newBet = new NewBet();
-        currentEvents = new CurrentEvents();
+        //currentEvents = new CurrentEvents();
           
         coverBooker = new CoverBooker();
         progressiveBooker = new ProgressiveBooker();
                
-        jTabbedPaneMenu.addTab("Current Events", currentEvents);
+        //jTabbedPaneMenu.addTab("Current Events", currentEvents);
+        jTabbedPaneMenu.addTab("Bets Manager", betsManager);
         jTabbedPaneMenu.addTab("New Bet", newBet);
         jTabbedPaneMenu.addTab("Progression Simulator", progressiveBooker);
         jTabbedPaneMenu.addTab("Cover Booker Calculator", coverBooker);
-        jTabbedPaneMenu.addTab("Bets Manager", betsManager);
     }
     
     public ConnectionManager getConnectionManager() 

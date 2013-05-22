@@ -10,24 +10,18 @@ package dataBase;
  */
 public class NewBet extends javax.swing.JPanel {
 
-    private ConnectionManager cm = new ConnectionManager();
-    private QueryManager queryManager = new QueryManager(cm.getConnection());
-    //private QueryManager queryManager = null;
+    
+    private ConnectionManager connectionManager = new ConnectionManager();
+    private QueryManager queryManager = new QueryManager(connectionManager.getConnection());
+    private Calendar calendar = null;
     
     public NewBet() 
     {
-        initComponents();   
+        initComponents();
+        calendar = new Calendar(jComboBoxDay, jComboBoxMonth, jComboBoxYear, jComboBoxHour, jComboBoxMinute);
         setFields();
     }
     
-    
-//    public NewBet(QueryManager queryManager) 
-//    {
-//        initComponents();   
-//        this.queryManager = queryManager;
-//        setFields();
-//    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -289,17 +283,7 @@ public class NewBet extends javax.swing.JPanel {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private String setDate()
-    {      
-        //YYYY-MM-DD HH:MM
-        return jComboBoxYear.getSelectedItem().toString() + "-" + 
-                jComboBoxMonth.getSelectedItem().toString()+ "-" +
-                jComboBoxDay.getSelectedItem().toString() + " " + 
-                jComboBoxHour.getSelectedItem().toString() +
-                ":" + jComboBoxMinute.getSelectedItem().toString();
-    }
-    
+ 
     private void setFields()
     {
         jLabelTitle.setText("Set information for new bet");
@@ -328,8 +312,8 @@ public class NewBet extends javax.swing.JPanel {
         
         queryManager.fillComboBoxExisitingProgression(jComboBoxExistingProgression);
         fillComboBoxBukmacher();
-        fillComboBoxDateTime();
         fillComboBoxType();
+        calendar.fillComboBoxDateTime();
     }
     
     private void fillComboBoxType()
@@ -350,53 +334,11 @@ public class NewBet extends javax.swing.JPanel {
         for(BukmacherENUM b : BukmacherENUM.values())
             jComboBoxBukmacher.addItem(b);
     }
-    
-    private void fillComboBoxDateTime()
-    {
-        for(int i=1; i<=31; i++)
-        {
-            if(i < 10)
-                jComboBoxDay.addItem("0" + i);
-            else
-                jComboBoxDay.addItem(i);
-        }
-        
-        for(int i=1; i<=12; i++)
-        {
-            if(i < 10)
-                jComboBoxMonth.addItem("0" + i);
-            else
-                jComboBoxMonth.addItem(i);
-        }
      
-        for(int i=2013; i<=2053; i++)
-            jComboBoxYear.addItem(i);
-        
-        for(int i=0; i<=55; i++)
-        {
-            if(i%5 == 0)
-            {
-                if(i < 10)
-                   jComboBoxMinute.addItem("0" + i); 
-                else
-                    jComboBoxMinute.addItem(i);
-            }
-        }
-                   
-        for(int i=1; i<=24; i++)
-        {
-            if(i < 10)
-                jComboBoxHour.addItem("0" + i);
-            else
-                jComboBoxHour.addItem(i);
-        }          
-    }
-    
-    
     private void jButtonAddBetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddBetActionPerformed
 
         String betName = jTextFieldBetName.getText();
-        String date = setDate();
+        String date = calendar.setDate();
         double odd = Double.parseDouble(jTextFieldOdd.getText());
         double stake = Double.parseDouble(jTextFieldStake.getText());
         String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();

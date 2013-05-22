@@ -20,8 +20,9 @@ public class DataFromDB {
     private LinkedList<Progression> progressions = new LinkedList<Progression>();    
      
     private LinkedList<Bet> todayBets = new LinkedList<Bet>();
+    private LinkedList<Bet> endedBetsToUpdate = new LinkedList<Bet>();
     
-    //connectionManager i queryManeger moze niepotrzebne
+    //polaczenie
     private ConnectionManager connectionManager = new ConnectionManager();
     private QueryManager queryManager = new QueryManager(connectionManager.getConnection());
     
@@ -29,12 +30,6 @@ public class DataFromDB {
     {
         fillLists();
     }
-       
-//    public DataFromDB(QueryManager queryManager)
-//    {
-//        this.queryManager = queryManager;
-//        fillLists();
-//    }
     
     private void fillLists()
     {
@@ -43,6 +38,7 @@ public class DataFromDB {
         queryManager.viewActiveProgressions(progressions);
         queryManager.viewActiveBetsInProgression(betsInProg);
         queryManager.viewTodayBets(todayBets);
+        queryManager.viewEndedBetsToUpdate(endedBetsToUpdate);
     }
     
     public String getBetNotInProgInfo(Bet selectedBet)
@@ -83,5 +79,10 @@ public class DataFromDB {
     public LinkedList<Bet> getTodayBets() 
     {
         return todayBets;
+    }
+    
+    public LinkedList<Bet> getEndedBetsToUpdate()
+    {
+        return endedBetsToUpdate;
     }
 }

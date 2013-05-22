@@ -43,6 +43,7 @@ public class QueryManager {
     private PreparedStatement viewProgressionInfoStmt = null;
     
     private PreparedStatement viewTodayBetsStmt = null;
+    private PreparedStatement viewEndedBetsToUpdateStmt = null;
             
     private static final String viewResolvedBetsQuery = "SELECT * FROM Bets WHERE Status = 2 OR Status = 3";  // OR ??
     private static final String viewWonBetsQuery = "SELECT * FROM Bets WHERE Status = 2";
@@ -86,8 +87,12 @@ public class QueryManager {
             + "FROM Bets b, Progressions p WHERE ProgressionId = ? "
             + "AND b.PartOfProgression = p.ProgressionId";
     
+    //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
             + "SUBSTR(Date,0,11) LIKE date()";
+    private static final String viewEndedBetsToUpdateQuery = "SELECT * FROM Bets "
+            + "WHERE SUBSTR(Date,0,11) < date() AND Status  = 1";       //SPRAWDZIC, CZY DOBRZE!!!
+    
     
        // odzielnie zapytanie do pobierania NOTE !!!!
     
@@ -98,6 +103,11 @@ public class QueryManager {
         this.conn = conn;
     }
     
+//    public QueryManager()
+//    {
+//        this.conn = ConnectionStatic.getConnection();
+//    }
+//    
     public int countAllBets()
     {
         try
@@ -305,6 +315,39 @@ public class QueryManager {
         }      
     }
     
+    public void viewEndedBetsToUpdate(LinkedList<Bet> endedBetsToUpdate)
+    {
+        try
+        {
+            if(viewEndedBetsToUpdateStmt == null)
+                viewEndedBetsToUpdateStmt = conn.prepareStatement(viewEndedBetsToUpdateQuery);
+            
+                resultSet = viewEndedBetsToUpdateStmt.executeQuery();
+                
+                while(resultSet.next())
+                {
+                    //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
+                    // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
+                    //public Bet(int betId, String betName, String date, double odd, double stake, 
+                    //String bukmacher, String note, String type)
+                    Bet endedBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5), resultSet.getString(8),
+                        resultSet.getString(9), resultSet.getString(11));
+                    //dodaje od razu jako nierozstrzygniete - konstruktor
+                    endedBetsToUpdate.add(endedBet);
+                    //System.out.println(resultSet.getString(3));
+                }
+                
+                resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
     public void viewTodayBets(LinkedList<Bet> todayBets)
     {
         try
@@ -326,7 +369,7 @@ public class QueryManager {
                         resultSet.getString(9), resultSet.getString(11));
                 //dodaje od razu jako nierozstrzygniete - konstruktor
                todayBets.add(todayBet);
-               System.out.println(resultSet.getString(3));
+               //System.out.println(resultSet.getString(3));
             }
             
             resultSet.close();
