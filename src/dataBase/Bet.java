@@ -46,6 +46,21 @@ public class Bet {
         this.balance = 0;
     }
     
+    public Bet(int betId, String betName, String date, double odd, double stake, 
+            int betStatus, String bukmacher, String note, double balance, String type)
+    {
+        this.betId = betId;
+        this.betName = betName;
+        this.date = date;
+        this.odd = odd;
+        this.stake = stake;
+        this.betStatus = betStatus;     
+        this.bukmacher = bukmacher;
+        this.note = note;
+        this.balance = balance;
+        this.type = type;
+    }
+    
     @Override
     public String toString()
     {

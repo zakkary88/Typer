@@ -30,6 +30,14 @@ public class BetInProgression extends Bet{
         progression = new Progression(progressionId, progressionName, progressionStatus);
     }
     
+    public BetInProgression(int betId, String betName, String date, double odd, 
+            double stake, int betStatus, String bukmacher, String note, double balance, 
+            String type, int progressionId, String progressionName, int progressionStatus)
+    {
+        super(betId, betName, date, odd, stake, betStatus, bukmacher, note, balance, type);
+        progression = new Progression(progressionId, progressionName, progressionStatus);
+    }
+    
     public BetInProgression(Bet bet, Progression progression)
     {
         super(bet.getBetId(), bet.getBetName(), bet.getDate(), bet.getOdd(), 

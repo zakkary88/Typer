@@ -12,7 +12,7 @@ public class Progression {
     
     private int progressionId;
     private String progressionName;
-    private int progressionStatus;    // np. 1 - trwa / 2 - zakonczona
+    private int progressionStatus;    // 1 - trwa / 2 - zakonczona
     
     public Progression(int progressionId, String progressionName)
     {

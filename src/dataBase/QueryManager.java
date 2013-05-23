@@ -20,10 +20,6 @@ public class QueryManager {
     private Connection conn = null;
     private ResultSet resultSet = null;
     
-    private PreparedStatement viewResolvedBetsStms = null;
-    private PreparedStatement viewWonBetsStmt = null;
-    private PreparedStatement viewLostBetsStmt = null;
-    
     private PreparedStatement countAllBetsStmt = null;
     private PreparedStatement countAllProgressionsStmt = null;
     
@@ -38,16 +34,23 @@ public class QueryManager {
     private PreparedStatement viewActiveBetsInProgressionStmt = null;
     private PreparedStatement viewActiveProgressionsStmt = null;
     
+    private PreparedStatement viewResolvedBetsNotInProgressionStmt = null;
+    private PreparedStatement viewResolvedBetsInProgressionStmt = null;
+    private PreparedStatement viewResolvedProgressionsStmt = null;
+    
+    private PreparedStatement viewWonBetsNotInProgression = null;
+    private PreparedStatement viewLostBetsNotInprogression = null;
+    private PreparedStatement viewCanceledBetsNotInProgression = null;
+    private PreparedStatement viewWonBetsInProgression = null;
+    private PreparedStatement viewLostBetsInProgression = null;
+    private PreparedStatement viewCanceledBetsInProgression = null;
+    
     private PreparedStatement viewBetNotInProgInfoStmt = null;
     private PreparedStatement viewBetInProgressionInfoStmt = null;
     private PreparedStatement viewProgressionInfoStmt = null;
     
     private PreparedStatement viewTodayBetsStmt = null;
-    private PreparedStatement viewEndedBetsToUpdateStmt = null;
-            
-    private static final String viewResolvedBetsQuery = "SELECT * FROM Bets WHERE Status = 2 OR Status = 3";  // OR ??
-    private static final String viewWonBetsQuery = "SELECT * FROM Bets WHERE Status = 2";
-    private static final String viewLostBetsQuery = "SELECT * FROM Bets WHERE Status = 3";        
+    private PreparedStatement viewEndedBetsToUpdateStmt = null;       
     
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
     private static final String countAllProgressionsQuery = "SELECT count(*) FROM Progressions";
@@ -67,7 +70,8 @@ public class QueryManager {
     //wszystkie aktywne zakłady
     private static final String viewAllActiveBetsQuery = "SELECT * FROM Bets WHERE Status = 1";
     //wszystkie aktywne zaklady, ktore nie sa częścią progresji
-    private static final String viewActiveBetsNotInPregressionQuery = "SELECT * FROM Bets WHERE Status = 1 AND PartOfProgression = 0";
+    private static final String viewActiveBetsNotInPregressionQuery = "SELECT * FROM Bets WHERE Status = 1 "
+            + "AND PartOfProgression = 0";
     //wszystkie aktywne zaklady, ktore sa czescia progresji
     private static final String viewActiveBetsInProgressionQuery = 
             "SELECT b.BetId, b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Note, b.Type,"
@@ -75,8 +79,20 @@ public class QueryManager {
             + " FROM Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId"
             + " AND b.Status = 1 AND b.PartOfProgression NOT LIKE 0 ";
     // wszystkie aktywne progresje
-    private static final String viewActiveProgressionsQuery = "SELECT * FROM Progressions WHERE ProgressionStatus = 1";
-    // PROGRESJE ZAKONCZONE TEZ TRZEBA WYSWIETLC !!!!!!!!!!!!!!
+    private static final String viewActiveProgressionsQuery = "SELECT * FROM Progressions "
+            + "WHERE ProgressionStatus = 1";
+   
+    //     moze byc problem przy OR i AND
+    //analogicznie - zakonczone (ze zmienionym statusem) progresje i zaklady
+    private static final String viewResolvedBetsNotInProgressionQuery = "SELECT * FROM Bets WHERE "
+            + "Status = 2 OR Status = 3 OR Status = 4 AND PartOfProgression = 0";
+    private static final String viewResolvedBetsInProgressionQuery = "SELECT b.BetId, "
+            + "b.BetName, b.Date, b.Odd, b.Stake, b.Status, b.Bukmacher, b.Note, b.Balance, b.Type"
+            + "p.ProgressionId, p.ProgressionName, p.ProgressionStatus "
+            + "FROM Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId "
+            + "AND b.Status = 2 OR b.Status = 3 OR b.Status = 4 AND b.PartOfProgression NOT LIKE 0";
+    private static final String viewResolvedProgressionsQuery = "SELECT * FROM "
+            + "WHERE ProgressionStatus = 2";
     
     private static final String viewBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
     private static final String viewBetInProgressionInfoQuery = 
@@ -497,6 +513,106 @@ public class QueryManager {
                 betsInProgression.add(newBetInProg);
             }
             
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    //przetestować  !!!!!!!!!!!
+    public void viewResolvedBetsInProgression(LinkedList<BetInProgression> resolvedBetsInProgression)
+    {
+         try
+        {
+            if(viewResolvedBetsInProgressionStmt == null)
+                viewResolvedBetsInProgressionStmt = conn.prepareStatement(viewResolvedBetsInProgressionQuery);
+            
+            resultSet = viewResolvedBetsInProgressionStmt.executeQuery();
+            
+            while(resultSet.next())
+            {
+
+//           "SELECT b.BetId, b.BetName, b.Date, b.Odd, b.Stake, b.Status, b.Bukmacher, b.Note, b.Balance, b.Type"
+//            + "p.ProgressionId, p.ProgressionName, p.ProgressionStatus "
+//            public BetInProgression(int betId, String betName, String date, double odd, 
+//            double stake, int betStatus, String bukmacher, String note, double balance, 
+//            String type, int progressionId, String progressionName, int progressionStatus)
+
+                BetInProgression newBetInProg = new BetInProgression(
+                        resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5), resultSet.getInt(6),
+                        resultSet.getString(7), resultSet.getString(8), 
+                        resultSet.getDouble(9), resultSet.getString(10),
+                                resultSet.getInt(11), 
+                                resultSet.getString(12), resultSet.getInt(13));
+                
+                resolvedBetsInProgression.add(newBetInProg);             
+            }
+            
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    //przetestowac !!!!!!!!!!!
+    public void viewResolvedBetsNotInProgression(LinkedList<Bet> resolvedBetsNotInProg)
+    {
+        try
+        {
+            if(viewResolvedBetsNotInProgressionStmt == null)
+                viewResolvedBetsNotInProgressionStmt = conn.prepareStatement(viewResolvedBetsNotInProgressionQuery);
+            
+            resultSet = viewResolvedBetsNotInProgressionStmt.executeQuery();
+            
+            while(resultSet.next())
+            {                          
+                //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
+                // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
+            //public Bet(int betId, String betName, String date, double odd, double stake, 
+            //int betStatus, String bukmacher, String note, double balance, String type)
+                Bet newBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5), resultSet.getInt(7),
+                        resultSet.getString(8), resultSet.getString(9), 
+                        resultSet.getDouble(10), resultSet.getString(11));
+
+                resolvedBetsNotInProg.add(newBet); 
+            }           
+            
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    //przetestowac  !!!!!!
+    public void viewResolvedProgressions(LinkedList<Progression> resolvedProgressions)
+    {
+        try
+        {
+            if(viewResolvedProgressionsStmt == null)
+                viewResolvedBetsNotInProgressionStmt = conn.prepareStatement(viewResolvedProgressionsQuery);
+            
+            resultSet = viewResolvedProgressionsStmt.executeQuery();
+            
+            while(resultSet.next())
+            {
+                Progression newProgression = new Progression(resultSet.getInt(1),
+                        resultSet.getString(2), resultSet.getInt(3));
+                resolvedProgressions.add(newProgression);
+            }
+
             resultSet.close();
         }
         catch(SQLException e)

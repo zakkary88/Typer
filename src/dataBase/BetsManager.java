@@ -10,8 +10,12 @@
  */
 package dataBase;
 
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import run.MainFrame;
 
 /**
  *
@@ -274,18 +278,70 @@ public class BetsManager extends javax.swing.JPanel {
     private void jComboBoxBetStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBetStatusActionPerformed
         
         //problem selekcji
-        jListBets.clearSelection();
-        //jListBets.setSelectedIndex(0);
+        //jListBets.clearSelection();
+        jListBets.setSelectedIndex(0);
+            
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask(), 100);
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
-        {           
-            jListBets.setModel(listModelAllActive);
-           // jListBets.repaint();
-           
+//        if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
+//                {           
+//                    jListBets.setModel(listModelAllActive);
+//                   // jListBets.repaint();
+//
+//                    jListBets.updateUI();
+//                    jTextAreaBetInfo.setText("Choose other Bet Status to view bet information.");
+//                }
+        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                
+          if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
+                {           
+                    jListBets.setModel(listModelAllActive);
+                   // jListBets.repaint();
+
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("Choose other Bet Status to view bet information.");
+                }       
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
+        {
+            jListBets.setModel(listModelActiveNotInProg);
+            //jListBets.repaint();
+            //jListBets.setSelectedIndex(0);
             jListBets.updateUI();
-            jTextAreaBetInfo.setText("Choose other Bet Status to view bet information.");
+            jTextAreaBetInfo.setText("");
+        }
+                
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
+        {
+            jListBets.setModel(listModelActiveInProg);
+            //jListBets.repaint();
+            //jListBets.setSelectedIndex(0);
+            jListBets.updateUI();
+            jTextAreaBetInfo.setText("");
         }
         
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
+        {
+            jListBets.setModel(listModelProgressions);
+            //jListBets.repaint();
+            //jListBets.setSelectedIndex(0);
+            jListBets.updateUI();
+            jTextAreaBetInfo.setText("");
+        }
+            }
+        });
+        
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                
+//        
+//            }
+//        });
+        
+        /*
         if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
         {
             jListBets.setModel(listModelActiveNotInProg);
@@ -312,16 +368,28 @@ public class BetsManager extends javax.swing.JPanel {
             jListBets.updateUI();
             jTextAreaBetInfo.setText("");
         }
-        
+        */
     }//GEN-LAST:event_jComboBoxBetStatusActionPerformed
     
     //TODO
     //przy przelaczaniu combobox na x.getSelectedValue pojawia sie NULL !!!
+    // NIE ZMIENIA SIE LIST MODEL!!!    Problem rzutowania
     private void jListBetsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListBetsValueChanged
         
-        String info = "";
+       // String info = "";
         //jListBets.setSelectedIndex(0);        // DZIAŁA !!!
+    
+       // if(jComboBoxBetStatus.isFocusOwner())
+      //  {
+//            Random rand = new Random();
+//            int n = rand.nextInt(listModelProgressions.size());
+//            jListBets.setSelectedIndex(n);
+       // }
         
+            java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+               
+                String info = "";
         if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
         {
             info = "Choose other Bet Status to view bet information.";           
@@ -342,6 +410,31 @@ public class BetsManager extends javax.swing.JPanel {
             info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
         }
         jTextAreaBetInfo.setText(info);
+            }
+        });
+            /*
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
+        {
+            info = "Choose other Bet Status to view bet information.";           
+        }
+        
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
+        {
+            info = dataFromDB.getBetNotInProgInfo((Bet)jListBets.getSelectedValue());
+        }
+        
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
+        {
+            info = dataFromDB.getBetInProgressionInfo((BetInProgression)jListBets.getSelectedValue());
+        }
+            
+        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
+        {
+            info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
+        }
+        */
+       // jTextAreaBetInfo.setText(info);
+        
     }//GEN-LAST:event_jListBetsValueChanged
 
     private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
