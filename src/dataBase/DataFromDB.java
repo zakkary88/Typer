@@ -21,6 +21,7 @@ public class DataFromDB {
      
     private LinkedList<Bet> todayBets = new LinkedList<Bet>();
     private LinkedList<Bet> endedBetsToUpdate = new LinkedList<Bet>();
+    private LinkedList<BetInProgression> endedBetsInProgToUpdate = new LinkedList<BetInProgression>();
     
     //polaczenie
     private ConnectionManager connectionManager = new ConnectionManager();
@@ -39,6 +40,73 @@ public class DataFromDB {
         queryManager.viewActiveBetsInProgression(betsInProg);
         queryManager.viewTodayBets(todayBets);
         queryManager.viewEndedBetsToUpdate(endedBetsToUpdate);
+        queryManager.viewEndedBetsInProgToUpdate(endedBetsInProgToUpdate);
+    }
+    
+    //zrzutuje wszystkie do Bet (niewazne, na tej liscie nie wyswietla sie info)
+    public int getActiveBetIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(Bet b : bets)
+        {
+            if(b.getBetId() == id)
+                result = index;
+            index++;              
+        }    
+        return result;
+    }
+    
+    public int getActiveBetNotInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(Bet bnip : betsNotInProg)
+        {
+            if(bnip.getBetId() == id)
+                result = index;
+            index++;              
+        }    
+        return result;
+    }
+    
+    public int getActiveBetInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(BetInProgression bip : betsInProg)
+        {
+            if(bip.getBetId() == id)
+                result = index;
+            index++;              
+        }    
+        return result;
+    }
+    
+    public int getEndedBetToUpdateIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(Bet b : endedBetsToUpdate)
+        {
+            if(b.getBetId() == id)
+                result = index;
+            index++;              
+        }    
+        return result;
+    }
+    
+    public int getEndedBetInProgToUpdateIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(BetInProgression bip : endedBetsInProgToUpdate)
+        {
+            if(bip.getBetId() == id)
+                result = index;
+            index++;              
+        }    
+        return result;
     }
     
     public String getBetNotInProgInfo(Bet selectedBet)
@@ -84,5 +152,15 @@ public class DataFromDB {
     public LinkedList<Bet> getEndedBetsToUpdate()
     {
         return endedBetsToUpdate;
+    }
+    
+    public LinkedList<BetInProgression> getEndedBetsInProgToUpdate() 
+    {
+        return endedBetsInProgToUpdate;
+    }
+    
+    public QueryManager getQueryManager() 
+    {
+        return queryManager;
     }
 }

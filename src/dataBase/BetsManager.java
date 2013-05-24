@@ -10,12 +10,9 @@
  */
 package dataBase;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.zip.DataFormatException;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
-import run.MainFrame;
 
 /**
  *
@@ -32,9 +29,10 @@ public class BetsManager extends javax.swing.JPanel {
     
     private DefaultListModel listModelTodayBets = new DefaultListModel();
     private DefaultListModel listModelEndedBetsToUpdate = new DefaultListModel();
+    private DefaultListModel listModelEndedBetsInProgToUpdate = new DefaultListModel();
 
     
-   public BetsManager() 
+    public BetsManager() 
     {
         initComponents();
         this.setSize(400, 400);
@@ -60,6 +58,7 @@ public class BetsManager extends javax.swing.JPanel {
     {
         jLabel2.setText("Today events:");
         jLabel3.setText("Ended events to update:");
+        jLabel4.setText("Ended events in progression:");
         
         jLabel1.setText("Bet status:");
         jTextAreaBetInfo.setText("Choose other Bet Status to view bet information.");
@@ -80,6 +79,7 @@ public class BetsManager extends javax.swing.JPanel {
         fillActiveProgressions();
         fillTodayBets();
         fillEndedBetsToUpdate();
+        fillEndedBetsInProgToUpdate();
     }
     
     private void fillJComboBoxStatus()
@@ -137,6 +137,13 @@ public class BetsManager extends javax.swing.JPanel {
             listModelEndedBetsToUpdate.addElement(b);
         jListEndedBetsToUpdate.setModel(listModelEndedBetsToUpdate);
     }
+    
+    private void fillEndedBetsInProgToUpdate()
+    {
+        for(BetInProgression bip : dataFromDB.getEndedBetsInProgToUpdate())
+            listModelEndedBetsInProgToUpdate.addElement(bip);
+        jListEndedBetsInProgToUpdate.setModel(listModelEndedBetsInProgToUpdate);
+    }
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -161,6 +168,10 @@ public class BetsManager extends javax.swing.JPanel {
         jListEndedBetsToUpdate = new javax.swing.JList();
         jButtonUpdate = new javax.swing.JButton();
         jLabelInformation = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jListEndedBetsInProgToUpdate = new javax.swing.JList();
+        jSeparator1 = new javax.swing.JSeparator();
 
         jLabel1.setText("jLabel1");
 
@@ -203,6 +214,11 @@ public class BetsManager extends javax.swing.JPanel {
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        jListEndedBetsToUpdate.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListEndedBetsToUpdateValueChanged(evt);
+            }
+        });
         jScrollPane4.setViewportView(jListEndedBetsToUpdate);
 
         jButtonUpdate.setText("jButton1");
@@ -214,6 +230,20 @@ public class BetsManager extends javax.swing.JPanel {
 
         jLabelInformation.setText("jLabel4");
 
+        jLabel4.setText("jLabel4");
+
+        jListEndedBetsInProgToUpdate.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jListEndedBetsInProgToUpdate.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListEndedBetsInProgToUpdateValueChanged(evt);
+            }
+        });
+        jScrollPane5.setViewportView(jListEndedBetsInProgToUpdate);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -221,55 +251,58 @@ public class BetsManager extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jComboBoxBetStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addGap(239, 239, 239)
-                        .addComponent(jLabel3))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(106, 106, 106)
-                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonUpdate))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 349, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(jLabelInformation))
-                .addContainerGap(108, Short.MAX_VALUE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 349, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jButtonUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel3)
+                                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel4)
+                                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                    .addComponent(jLabelInformation)
+                    .addComponent(jComboBoxBetStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jSeparator1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonUpdate))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(23, 23, 23)))
+                        .addComponent(jLabel4))
+                    .addComponent(jLabel2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(6, 6, 6)
+                .addComponent(jButtonUpdate)
+                .addGap(7, 7, 7)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jComboBoxBetStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelInformation))
+                .addComponent(jLabelInformation)
+                .addGap(18, 18, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -411,44 +444,80 @@ public class BetsManager extends javax.swing.JPanel {
         }
         jTextAreaBetInfo.setText(info);
             }
-        });
-            /*
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
-        {
-            info = "Choose other Bet Status to view bet information.";           
-        }
-        
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
-        {
-            info = dataFromDB.getBetNotInProgInfo((Bet)jListBets.getSelectedValue());
-        }
-        
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
-        {
-            info = dataFromDB.getBetInProgressionInfo((BetInProgression)jListBets.getSelectedValue());
-        }
-            
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
-        {
-            info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
-        }
-        */
-       // jTextAreaBetInfo.setText(info);
-        
+        });    
     }//GEN-LAST:event_jListBetsValueChanged
 
     private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
         
-        if(jListEndedBetsToUpdate.getSelectedValue() == null)
-            jLabelInformation.setText("Choose ended bet to update from list.");
-        else
+        if(jListEndedBetsToUpdate.getSelectedValue() == null
+                && jListEndedBetsInProgToUpdate.getSelectedValue() == null)
+        {
+            jLabelInformation.setText("Choose ended bet to update from one of lists in the top.");
+        }
+        else        //TODO wszystko do button confirm
         {
             UpdateBet updateBet = new UpdateBet();
             updateBet.setVisible(true);
             updateBet.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            String betInfo = "";
+            
+            if(jListEndedBetsToUpdate.getSelectedValue() != null)
+            {
+                Object object = listModelEndedBetsToUpdate.getElementAt(jListEndedBetsToUpdate.getSelectedIndex());
+                Bet selectedBet = (Bet) object;
+                int id = selectedBet.getBetId();
+                updateBet.updateBet(dataFromDB.getQueryManager(), id);
+                betInfo = dataFromDB.getBetNotInProgInfo(selectedBet);
+                
+                int index = 0;
+                //aktualizacja list
+                //lista zakladow do uaktulanienia (1 z 4)
+                listModelEndedBetsToUpdate.remove(jListEndedBetsToUpdate.getSelectedIndex());
+               
+                //wyczyszczenie modelu, odjecie z listy, wczytanie nowego modelu               
+                //lista aktywnych zakladow (2 z 4)
+                listModelAllActive.clear();
+                index = dataFromDB.getActiveBetIndexById(id);
+                dataFromDB.getBets().remove(index);
+                fillAllActiveBetsList();
+
+                //lista aktywnych zakladow nie w progresji (3 z 4)
+                listModelActiveNotInProg.clear();
+                index = dataFromDB.getActiveBetNotInProgIndexById(id);
+                dataFromDB.getBetsNotInProg().remove(index);
+                fillActiveBetsNotInProgression();
+                
+                //TODO
+                //lista zakladow zakonczonych
+                
+            }
+            
+            if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
+            {
+                Object object = listModelEndedBetsInProgToUpdate.getElementAt(
+                        jListEndedBetsInProgToUpdate.getSelectedIndex());
+                
+                BetInProgression selectedBet = (BetInProgression)object;
+                betInfo = dataFromDB.getBetInProgressionInfo(selectedBet);
+                
+                //TODO 
+                //analogicznie
+            }
+            
+            updateBet.getjTextAreaInfo().setText(betInfo);
             jLabelInformation.setText("");
         }
     }//GEN-LAST:event_jButtonUpdateActionPerformed
+
+    private void jListEndedBetsToUpdateValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListEndedBetsToUpdateValueChanged
+        
+        jListEndedBetsInProgToUpdate.clearSelection();
+    }//GEN-LAST:event_jListEndedBetsToUpdateValueChanged
+
+    private void jListEndedBetsInProgToUpdateValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListEndedBetsInProgToUpdateValueChanged
+        
+        jListEndedBetsToUpdate.clearSelection();
+    }//GEN-LAST:event_jListEndedBetsInProgToUpdateValueChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonUpdate;
@@ -456,14 +525,18 @@ public class BetsManager extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabelInformation;
     private javax.swing.JList jListBets;
+    private javax.swing.JList jListEndedBetsInProgToUpdate;
     private javax.swing.JList jListEndedBetsToUpdate;
     private javax.swing.JList jListTodayBets;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextArea jTextAreaBetInfo;
     // End of variables declaration//GEN-END:variables
 }

@@ -4,6 +4,8 @@
  */
 package dataBase;
 
+import javax.swing.JTextArea;
+
 /**
  *
  * @author Marcin
@@ -13,6 +15,8 @@ public class UpdateBet extends javax.swing.JFrame {
     /**
      * Creates new form UpdateBet
      */
+    private int status = 1;     //jeszcze nierozstrzygnięty
+    
     public UpdateBet() {
         initComponents();
         setFields();
@@ -23,7 +27,13 @@ public class UpdateBet extends javax.swing.JFrame {
         jRadioButtonWon.setText("Won");
         jRadioButtonLost.setText("Lost");
         jRadioButtonCanceled.setText("Canceled/Postponed");
+        jRadioButtonUnresolved.setText("Unresolved");
         jButtonUpdateResult.setText("Confirm");
+    }
+    
+    public void updateBet(QueryManager queryManager, int id)
+    {
+        queryManager.changeBetStatus(status, id);
     }
 
     /**
@@ -37,20 +47,26 @@ public class UpdateBet extends javax.swing.JFrame {
 
         buttonGroupResult = new javax.swing.ButtonGroup();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextAreaBetInfo = new javax.swing.JTextArea();
+        jTextAreaInfo = new javax.swing.JTextArea();
         jRadioButtonWon = new javax.swing.JRadioButton();
         jRadioButtonLost = new javax.swing.JRadioButton();
         jRadioButtonCanceled = new javax.swing.JRadioButton();
         jButtonUpdateResult = new javax.swing.JButton();
+        jRadioButtonUnresolved = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTextAreaBetInfo.setColumns(20);
-        jTextAreaBetInfo.setRows(5);
-        jScrollPane1.setViewportView(jTextAreaBetInfo);
+        jTextAreaInfo.setColumns(20);
+        jTextAreaInfo.setRows(5);
+        jScrollPane1.setViewportView(jTextAreaInfo);
 
         buttonGroupResult.add(jRadioButtonWon);
         jRadioButtonWon.setText("jRadioButton1");
+        jRadioButtonWon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonWonActionPerformed(evt);
+            }
+        });
 
         buttonGroupResult.add(jRadioButtonLost);
         jRadioButtonLost.setText("jRadioButton2");
@@ -59,6 +75,15 @@ public class UpdateBet extends javax.swing.JFrame {
         jRadioButtonCanceled.setText("jRadioButton3");
 
         jButtonUpdateResult.setText("jButton1");
+        jButtonUpdateResult.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonUpdateResultActionPerformed(evt);
+            }
+        });
+
+        buttonGroupResult.add(jRadioButtonUnresolved);
+        jRadioButtonUnresolved.setSelected(true);
+        jRadioButtonUnresolved.setText("jRadioButton1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -66,28 +91,34 @@ public class UpdateBet extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(38, 38, 38)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButtonWon)
-                    .addComponent(jRadioButtonLost)
-                    .addComponent(jRadioButtonCanceled)
-                    .addComponent(jButtonUpdateResult))
-                .addContainerGap(108, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jRadioButtonWon)
+                            .addComponent(jRadioButtonLost)
+                            .addComponent(jRadioButtonCanceled)
+                            .addComponent(jRadioButtonUnresolved))
+                        .addGap(0, 54, Short.MAX_VALUE))
+                    .addComponent(jButtonUpdateResult, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jRadioButtonWon)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jRadioButtonLost)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jRadioButtonCanceled)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButtonUpdateResult))
+                        .addGap(2, 2, 2)
+                        .addComponent(jRadioButtonUnresolved)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButtonUpdateResult, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(36, Short.MAX_VALUE))
         );
@@ -95,6 +126,32 @@ public class UpdateBet extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jRadioButtonWonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonWonActionPerformed
+        
+        if(jRadioButtonUnresolved.isSelected())
+            status = 1;
+        
+        if(jRadioButtonWon.isSelected())
+            status = 2;
+        
+        if(jRadioButtonLost.isSelected())
+            status = 3;
+        
+        if(jRadioButtonCanceled.isSelected())
+            status = 4;
+        
+        System.out.println(status);
+    }//GEN-LAST:event_jRadioButtonWonActionPerformed
+
+    private void jButtonUpdateResultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateResultActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonUpdateResultActionPerformed
+
+    public JTextArea getjTextAreaInfo()
+    {
+        return jTextAreaInfo;
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -134,8 +191,9 @@ public class UpdateBet extends javax.swing.JFrame {
     private javax.swing.JButton jButtonUpdateResult;
     private javax.swing.JRadioButton jRadioButtonCanceled;
     private javax.swing.JRadioButton jRadioButtonLost;
+    private javax.swing.JRadioButton jRadioButtonUnresolved;
     private javax.swing.JRadioButton jRadioButtonWon;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextAreaBetInfo;
+    private javax.swing.JTextArea jTextAreaInfo;
     // End of variables declaration//GEN-END:variables
 }

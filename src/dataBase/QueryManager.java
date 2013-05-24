@@ -50,12 +50,17 @@ public class QueryManager {
     private PreparedStatement viewProgressionInfoStmt = null;
     
     private PreparedStatement viewTodayBetsStmt = null;
-    private PreparedStatement viewEndedBetsToUpdateStmt = null;       
+    private PreparedStatement viewEndedBetsToUpdateStmt = null; 
+    private PreparedStatement viewEndedBetsInProgressionToUpdateStmt = null;
+    
+    //UPDATES
+    private PreparedStatement changeBetStatusStmt = null;
+    private PreparedStatement changeWonBetBalanceStmt = null;
+    private PreparedStatement changeLostBetBalanceStmt = null;
     
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
     private static final String countAllProgressionsQuery = "SELECT count(*) FROM Progressions";
-   
-    // KLUCZE OBCE ???   
+    
     //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
     // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
     // 0 - nie jest czescia progresji, 1 - status nierozstrzygniety, 0 - saldo narazie na 0
@@ -105,10 +110,23 @@ public class QueryManager {
     
     //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
-            + "SUBSTR(Date,0,11) LIKE date()";
+            + "SUBSTR(Date,0,11) LIKE date()";   
     private static final String viewEndedBetsToUpdateQuery = "SELECT * FROM Bets "
-            + "WHERE SUBSTR(Date,0,11) < date() AND Status  = 1";       //SPRAWDZIC, CZY DOBRZE!!!
+            + "WHERE SUBSTR(Date,0,11) < date() AND Status  = 1 AND "
+            + "PartOfProgression = 0";         
+    private static final String viewEndedBetsInProgressionToUpdateQuery = 
+            "SELECT b.BetId, b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Note, b.Type, "
+            + "p.ProgressionId, p.ProgressionName, p.ProgressionStatus FROM "
+            + "Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId AND "
+            + "SUBSTR(b.Date,0,11) < date() AND b.Status  = 1";
     
+    //UPDATE
+    private static final String changeBetStatusQuery = "UPDATE Bets SET Status = ? "
+            + "WHERE BetId = ?";
+    private static final String changeWonBetBalanceQuery = "UPDATE Bets SET "
+            + "Balance = round((Odd - 1.0) * Stake, 2) WHERE BetId = ?";
+    private static final String changeLostBetBalanceQuery = "UPDATE Bets SET "
+            + "Balance = - Stake WHERE BetId = ?";
     
        // odzielnie zapytanie do pobierania NOTE !!!!
     
@@ -118,12 +136,7 @@ public class QueryManager {
     {
         this.conn = conn;
     }
-    
-//    public QueryManager()
-//    {
-//        this.conn = ConnectionStatic.getConnection();
-//    }
-//    
+
     public int countAllBets()
     {
         try
@@ -199,6 +212,50 @@ public class QueryManager {
     private int setIdForProgression()
     {
         return countAllProgressions() + 1;
+    }
+    
+    public void changeBetStatus(int newStatus, int betId)
+    {
+        try
+        {         
+            if(changeBetStatusStmt == null)
+                changeBetStatusStmt = conn.prepareStatement(changeBetStatusQuery);
+
+            changeBetStatusStmt.setInt(1, betId);
+            changeBetStatusStmt.setInt(2, newStatus);
+            
+            int update = changeBetStatusStmt.executeUpdate();
+            System.out.println(update + " updates. " + "Bet: " + betId + 
+                    " updated to status: " + newStatus);
+                       
+            //update na postawie statusu zakladu (wygrany/przegrany)
+            if(newStatus == 2)  //wygrany
+            {
+                if(changeWonBetBalanceStmt == null)
+                    changeWonBetBalanceStmt = conn.prepareStatement(changeWonBetBalanceQuery);
+                
+                changeWonBetBalanceStmt.setInt(1, betId);
+                
+                int up = changeWonBetBalanceStmt.executeUpdate();
+                System.out.println(up + " updates. " + "Bet: " + betId + " won!");
+            }
+            
+            if(newStatus == 3)  //przegrany
+            {
+                if(changeLostBetBalanceStmt == null)
+                    changeLostBetBalanceStmt = conn.prepareStatement(changeLostBetBalanceQuery);
+                
+                changeLostBetBalanceStmt.setInt(1, betId);
+                
+                int up = changeLostBetBalanceStmt.executeUpdate();
+                System.out.println(up + " updates. " + "Bet: " + betId + " lost!");
+            }
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
     }
                 
     public void addBet(String betName, String date, double odd, double stake,
@@ -331,6 +388,7 @@ public class QueryManager {
         }      
     }
     
+    
     public void viewEndedBetsToUpdate(LinkedList<Bet> endedBetsToUpdate)
     {
         try
@@ -338,10 +396,10 @@ public class QueryManager {
             if(viewEndedBetsToUpdateStmt == null)
                 viewEndedBetsToUpdateStmt = conn.prepareStatement(viewEndedBetsToUpdateQuery);
             
-                resultSet = viewEndedBetsToUpdateStmt.executeQuery();
-                
-                while(resultSet.next())
-                {
+            resultSet = viewEndedBetsToUpdateStmt.executeQuery();
+            
+            while(resultSet.next())
+            {
                     //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
                     // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
                     //public Bet(int betId, String betName, String date, double odd, double stake, 
@@ -351,10 +409,42 @@ public class QueryManager {
                         resultSet.getDouble(5), resultSet.getString(8),
                         resultSet.getString(9), resultSet.getString(11));
                     //dodaje od razu jako nierozstrzygniete - konstruktor
-                    endedBetsToUpdate.add(endedBet);
-                    //System.out.println(resultSet.getString(3));
-                }
+                    endedBetsToUpdate.add(endedBet);  
+            }
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    public void viewEndedBetsInProgToUpdate(LinkedList<BetInProgression> endedBetsInProgToUpdate)
+    {
+        try
+        {
+            if(viewEndedBetsInProgressionToUpdateStmt == null)
+                viewEndedBetsInProgressionToUpdateStmt = conn.prepareStatement(viewEndedBetsInProgressionToUpdateQuery);
+            
+                resultSet = viewEndedBetsInProgressionToUpdateStmt.executeQuery();
                 
+                while(resultSet.next())
+                {
+                    //"SELECT b.BetId, b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Note, b.Type,"
+              //+ " p.ProgressionId, p.ProgressionName, p.ProgressionStatus "
+              //  public BetInProgression(int betId, String betName, String date, double odd, double stake,
+              // String bukmacher, String note, String type, int progressionId, String progressionName)
+                BetInProgression endedBetInProg = new BetInProgression(
+                        new Bet(resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5),resultSet.getString(6),
+                        resultSet.getString(7), resultSet.getString(8)),
+                                new Progression(resultSet.getInt(9), 
+                                resultSet.getString(10), resultSet.getInt(11)));
+                
+                endedBetsInProgToUpdate.add(endedBetInProg);        
+                }              
                 resultSet.close();
         }
         catch(SQLException e)
@@ -621,8 +711,7 @@ public class QueryManager {
                 System.out.println(t.getMessage());
         }
     }
-    
-    
+       
     public String viewBetNotInProgInfo(int id)
     {
         try
