@@ -4,6 +4,7 @@
  */
 package dataBase;
 
+import javax.swing.JList;
 import javax.swing.JTextArea;
 
 /**
@@ -16,6 +17,10 @@ public class UpdateBet extends javax.swing.JFrame {
      * Creates new form UpdateBet
      */
     private int status = 1;     //jeszcze nierozstrzygnięty
+    
+    private JList jListEndedBetsToUpdate = new JList();
+    private JList jListEndedBetsInProgToUpdate = new JList();
+    private JList jListTodayBets = new JList();
     
     public UpdateBet() {
         initComponents();
@@ -31,9 +36,12 @@ public class UpdateBet extends javax.swing.JFrame {
         jButtonUpdateResult.setText("Confirm");
     }
     
-    public void updateBet(QueryManager queryManager, int id)
+    public void getLists(JList jListEndedBetsToUpdate, JList jListEndedBetsInProgToUpdate,
+            JList jListTodayBets)
     {
-        queryManager.changeBetStatus(status, id);
+        this.jListEndedBetsInProgToUpdate = jListEndedBetsInProgToUpdate;
+        this.jListEndedBetsToUpdate = jListEndedBetsToUpdate;
+        this.jListTodayBets = jListTodayBets;
     }
 
     /**
@@ -70,9 +78,19 @@ public class UpdateBet extends javax.swing.JFrame {
 
         buttonGroupResult.add(jRadioButtonLost);
         jRadioButtonLost.setText("jRadioButton2");
+        jRadioButtonLost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonLostActionPerformed(evt);
+            }
+        });
 
         buttonGroupResult.add(jRadioButtonCanceled);
         jRadioButtonCanceled.setText("jRadioButton3");
+        jRadioButtonCanceled.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCanceledActionPerformed(evt);
+            }
+        });
 
         jButtonUpdateResult.setText("jButton1");
         jButtonUpdateResult.addActionListener(new java.awt.event.ActionListener() {
@@ -84,6 +102,11 @@ public class UpdateBet extends javax.swing.JFrame {
         buttonGroupResult.add(jRadioButtonUnresolved);
         jRadioButtonUnresolved.setSelected(true);
         jRadioButtonUnresolved.setText("jRadioButton1");
+        jRadioButtonUnresolved.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonUnresolvedActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -127,30 +150,85 @@ public class UpdateBet extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jRadioButtonWonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonWonActionPerformed
-        
-        if(jRadioButtonUnresolved.isSelected())
-            status = 1;
-        
-        if(jRadioButtonWon.isSelected())
-            status = 2;
-        
-        if(jRadioButtonLost.isSelected())
-            status = 3;
-        
-        if(jRadioButtonCanceled.isSelected())
-            status = 4;
-        
+       
+        status = 2;
         System.out.println(status);
     }//GEN-LAST:event_jRadioButtonWonActionPerformed
 
     private void jButtonUpdateResultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateResultActionPerformed
-        // TODO add your handling code here:
+             
+        if(jListEndedBetsToUpdate.getSelectedValue() != null)
+            {
+                // te rzeczy powinny zostac przekazane w jakis sposob !!
+//                Object object = DataContainer.listModelEndedBetsToUpdate.getElementAt
+//                        (jListEndedBetsToUpdate.getSelectedIndex());
+//                Bet selectedBet = (Bet) object;
+//                int id = selectedBet.getBetId();
+//                betInfo = DataContainer.dataFromDB.getBetNotInProgInfo(selectedBet);
+                
+                int index = 0;
+                //aktualizacja list
+                //lista zakladow do uaktulanienia  - usuniecie (1 z 4)
+                DataContainer.listModelEndedBetsToUpdate.remove     
+                        (jListEndedBetsToUpdate.getSelectedIndex());
+               
+                //wyczyszczenie modelu, odjecie z listy, wczytanie nowego modelu               
+                //lista aktywnych zakladow (2 z 4) - usuniecie
+                DataContainer.listModelAllActive.clear();
+                index = DataContainer.dataFromDB.getActiveBetIndexById(DataContainer.id);
+                DataContainer.dataFromDB.getBets().remove(index);
+                DataContainer.fillAllActiveBetsList();
+
+                //lista aktywnych zakladow nie w progresji (3 z 4) - usuniecie
+                DataContainer.listModelActiveNotInProg.clear();
+                index = DataContainer.dataFromDB.getActiveBetNotInProgIndexById(DataContainer.id);
+                DataContainer.dataFromDB.getBetsNotInProg().remove(index);
+                DataContainer.fillActiveBetsNotInProgression();
+                
+                //lista zakladow zakonczonych (4 z 4) - dodanie
+                Bet bet = (Bet) DataContainer.object;
+                DataContainer.listModelResolvedBetsNotInProg.addElement(bet);
+                //mozliwe, ze trzeba liste wyczyscic i dodac wszystkie na nowo
+                
+                //aktualizacja bazy danych
+                DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
+                DataContainer.dataFromDB.getQueryManager().commitChanges();
+                
+                System.out.println(status);
+            }
+            
+//            if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
+//            {
+//                Object object = listModelEndedBetsInProgToUpdate.getElementAt(
+//                        jListEndedBetsInProgToUpdate.getSelectedIndex());
+//                
+//                BetInProgression selectedBet = (BetInProgression)object;
+//                betInfo = dataFromDB.getBetInProgressionInfo(selectedBet);
+//                
+//                //TODO 
+//                //analogicznie
+//            }
+            
     }//GEN-LAST:event_jButtonUpdateResultActionPerformed
 
-    public JTextArea getjTextAreaInfo()
-    {
-        return jTextAreaInfo;
-    }
+    private void jRadioButtonLostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonLostActionPerformed
+        
+        status = 3;
+        System.out.println(status);
+    }//GEN-LAST:event_jRadioButtonLostActionPerformed
+
+    private void jRadioButtonCanceledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCanceledActionPerformed
+        
+        status = 4;
+        System.out.println(status);
+    }//GEN-LAST:event_jRadioButtonCanceledActionPerformed
+
+    private void jRadioButtonUnresolvedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonUnresolvedActionPerformed
+        
+        status = 1;
+        System.out.println(status);
+    }//GEN-LAST:event_jRadioButtonUnresolvedActionPerformed
+
     
     /**
      * @param args the command line arguments
@@ -196,4 +274,9 @@ public class UpdateBet extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextAreaInfo;
     // End of variables declaration//GEN-END:variables
+
+    public JTextArea getjTextAreaInfo() 
+    {
+        return jTextAreaInfo;
+    }
 }

@@ -23,6 +23,8 @@ public class DataFromDB {
     private LinkedList<Bet> endedBetsToUpdate = new LinkedList<Bet>();
     private LinkedList<BetInProgression> endedBetsInProgToUpdate = new LinkedList<BetInProgression>();
     
+    private LinkedList<Bet> resolvedBetsNotInProg = new LinkedList<Bet>();
+    
     //polaczenie
     private ConnectionManager connectionManager = new ConnectionManager();
     private QueryManager queryManager = new QueryManager(connectionManager.getConnection());
@@ -38,9 +40,12 @@ public class DataFromDB {
         queryManager.viewActiveBetsNotInProgression(betsNotInProg);
         queryManager.viewActiveProgressions(progressions);
         queryManager.viewActiveBetsInProgression(betsInProg);
+        
         queryManager.viewTodayBets(todayBets);
         queryManager.viewEndedBetsToUpdate(endedBetsToUpdate);
         queryManager.viewEndedBetsInProgToUpdate(endedBetsInProgToUpdate);
+        
+        queryManager.viewResolvedBetsNotInProgression(resolvedBetsNotInProg);
     }
     
     //zrzutuje wszystkie do Bet (niewazne, na tej liscie nie wyswietla sie info)
@@ -123,6 +128,11 @@ public class DataFromDB {
     {
         return queryManager.viewProgressionInfo(selectedProgression.getProgressionId());
     }
+    
+    public String getResolvedBetNotInProgInfo(Bet selectedBet)
+    {
+        return queryManager.viewResolvedBetNotInProgInfo(selectedBet.getBetId());
+    }
 
     public LinkedList<Bet> getBets() 
     {
@@ -157,6 +167,11 @@ public class DataFromDB {
     public LinkedList<BetInProgression> getEndedBetsInProgToUpdate() 
     {
         return endedBetsInProgToUpdate;
+    }
+    
+    public LinkedList<Bet> getResolvedBetsNotInProg() 
+    {
+        return resolvedBetsNotInProg;
     }
     
     public QueryManager getQueryManager() 

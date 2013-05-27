@@ -104,6 +104,9 @@
         </Property>
         <Property name="text" type="java.lang.String" value="jRadioButton2"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadioButtonLostActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="jRadioButtonCanceled">
       <Properties>
@@ -112,6 +115,9 @@
         </Property>
         <Property name="text" type="java.lang.String" value="jRadioButton3"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadioButtonCanceledActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButtonUpdateResult">
       <Properties>
@@ -129,6 +135,9 @@
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" value="jRadioButton1"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadioButtonUnresolvedActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>
