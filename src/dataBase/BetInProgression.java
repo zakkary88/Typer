@@ -68,4 +68,9 @@ public class BetInProgression extends Bet{
         return betId + " " + betName + " | " + progression.getProgressionName() 
                 + " " + progression.getProgressionId();
     }
+    
+    public Progression getProgression() 
+    {
+        return progression;
+    }
 }

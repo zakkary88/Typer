@@ -24,6 +24,10 @@ public class DataFromDB {
     private LinkedList<BetInProgression> endedBetsInProgToUpdate = new LinkedList<BetInProgression>();
     
     private LinkedList<Bet> resolvedBetsNotInProg = new LinkedList<Bet>();
+    private LinkedList<BetInProgression> resolvedBetsInProg = new LinkedList<BetInProgression>();
+    private LinkedList<Progression> resolvedProgressions = new LinkedList<Progression>();
+    
+    private double resolvedProgressionBalance = 0.0;
     
     //polaczenie
     private ConnectionManager connectionManager = new ConnectionManager();
@@ -46,9 +50,11 @@ public class DataFromDB {
         queryManager.viewEndedBetsInProgToUpdate(endedBetsInProgToUpdate);
         
         queryManager.viewResolvedBetsNotInProgression(resolvedBetsNotInProg);
+        queryManager.viewResolvedBetsInProgression(resolvedBetsInProg);
+        queryManager.viewResolvedProgressions(resolvedProgressions);
     }
     
-    //zrzutuje wszystkie do Bet (niewazne, na tej liscie nie wyswietla sie info)
+    //zrzutuje wszystkie zaklady w gore do Bet (niewazne, na tej liscie nie wyswietla sie info)
     public int getActiveBetIndexById(int id)
     {
         int index = 0;
@@ -114,6 +120,19 @@ public class DataFromDB {
         return result;
     }
     
+    public int getProgressionsIndexById(int progressionId)
+    {
+        int index = 0;
+        int result = 0;
+        for(Progression p : progressions)
+        {
+            if(p.getProgressionId() == progressionId)
+                result = index;
+            index++;
+        }
+        return result;
+    }
+    
     public String getBetNotInProgInfo(Bet selectedBet)
     {
         return queryManager.viewBetNotInProgInfo(selectedBet.getBetId());
@@ -132,6 +151,21 @@ public class DataFromDB {
     public String getResolvedBetNotInProgInfo(Bet selectedBet)
     {
         return queryManager.viewResolvedBetNotInProgInfo(selectedBet.getBetId());
+    }
+    
+    public String getResolvedBetInProgInfo(BetInProgression selectedBet)
+    {
+        return queryManager.viewResolvedBetInProgInfo(selectedBet.getBetId());
+    }
+    
+    public String getResolvedProgressionInfo(Progression selectedProgression)
+    {
+        return queryManager.viewProgressionInfo(selectedProgression.getProgressionId());
+    }
+    
+    public double getResolvedProgressionBalance(Progression selectedProgression)
+    {
+        return queryManager.viewResolvedProgressionBalance(selectedProgression.getProgressionId());
     }
 
     public LinkedList<Bet> getBets() 
@@ -177,5 +211,15 @@ public class DataFromDB {
     public QueryManager getQueryManager() 
     {
         return queryManager;
+    }
+    
+    public LinkedList<BetInProgression> getResolvedBetsInProg() 
+    {
+        return resolvedBetsInProg;
+    }
+    
+    public LinkedList<Progression> getResolvedPregressions() 
+    {
+        return resolvedProgressions;
     }
 }

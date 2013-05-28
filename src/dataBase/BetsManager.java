@@ -65,8 +65,7 @@ public class BetsManager extends javax.swing.JPanel {
         
         jListTodayBets.setEnabled(false);
     }
-    
-    
+       
     //zmiany -  nie bylo datacontainer
     private void fillLists()
     {
@@ -83,6 +82,8 @@ public class BetsManager extends javax.swing.JPanel {
         fillEndedBetsInProgToUpdate();
         
         DataContainer.fillResolvedBetsNotInProg();
+        DataContainer.fillResolvedBetsInProg();
+        DataContainer.fillResolvedProgressions();
     }
     
     private void fillJComboBoxStatus()
@@ -95,6 +96,8 @@ public class BetsManager extends javax.swing.JPanel {
         
         //zakonczone
         jComboBoxBetStatus.addItem("Resolved bets not in progressions");
+        jComboBoxBetStatus.addItem("Resolved bets in progressions");
+        jComboBoxBetStatus.addItem("Resolved progressions");
     }
     
     // NIE WSZYSTKIE SA UZYWANE
@@ -340,9 +343,10 @@ public class BetsManager extends javax.swing.JPanel {
 //                }
         
         java.awt.EventQueue.invokeLater(new Runnable() {
+            
             public void run() {
                 
-          if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
                 {           
                     jListBets.setModel(DataContainer.listModelAllActive);
                    // jListBets.repaint();
@@ -352,38 +356,52 @@ public class BetsManager extends javax.swing.JPanel {
                 }       
                 
                 if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
-        {
-            jListBets.setModel(DataContainer.listModelActiveNotInProg);
-            //jListBets.repaint();
-            //jListBets.setSelectedIndex(0);
-            jListBets.updateUI();
-            jTextAreaBetInfo.setText("");
-        }
+                {
+                    jListBets.setModel(DataContainer.listModelActiveNotInProg);
+                    //jListBets.repaint();
+                    //jListBets.setSelectedIndex(0);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
                 
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
-        {
-            jListBets.setModel(DataContainer.listModelActiveInProg);
-            //jListBets.repaint();
-            //jListBets.setSelectedIndex(0);
-            jListBets.updateUI();
-            jTextAreaBetInfo.setText("");
-        }
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelActiveInProg);
+                    //jListBets.repaint();
+                    //jListBets.setSelectedIndex(0);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
-        {
-            jListBets.setModel(DataContainer.listModelProgressions);
-            //jListBets.repaint();
-            //jListBets.setSelectedIndex(0);
-            jListBets.updateUI();
-            jTextAreaBetInfo.setText("");
-        }
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelProgressions);
+                    //jListBets.repaint();
+                    //jListBets.setSelectedIndex(0);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions"))
-        {
-            jListBets.setModel(DataContainer.listModelResolvedBetsNotInProg);
-            jListBets.updateUI();
-            jTextAreaBetInfo.setText("");
-        }
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelResolvedBetsNotInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+        
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelResolvedBetsInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+        
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelResolvedProgressions);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
             }
         });
          
@@ -395,44 +413,52 @@ public class BetsManager extends javax.swing.JPanel {
         
        // String info = "";
         //jListBets.setSelectedIndex(0);        // DZIAŁA !!!
-    
-       // if(jComboBoxBetStatus.isFocusOwner())
-      //  {
-//            Random rand = new Random();
-//            int n = rand.nextInt(listModelProgressions.size());
-//            jListBets.setSelectedIndex(n);
-       // }
+   
         
             java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
+                
+                public void run() {
                
-                String info = "";
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
-        {
-            info = "Choose other Bet Status to view bet information.";           
-        }
+                    String info = "";
+                    
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("All active bets"))
+                    {
+                        info = "Choose other Bet Status to view bet information.";           
+                    }
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
-        {
-            info = dataFromDB.getBetNotInProgInfo((Bet)jListBets.getSelectedValue());
-        }
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
+                    {
+                        info = dataFromDB.getBetNotInProgInfo((Bet)jListBets.getSelectedValue());
+                    }
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
-        {
-            info = dataFromDB.getBetInProgressionInfo((BetInProgression)jListBets.getSelectedValue());
-        }
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
+                    {
+                        info = dataFromDB.getBetInProgressionInfo((BetInProgression)jListBets.getSelectedValue());
+                    }
             
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
-        {
-            info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
-        }
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
+                    {
+                        info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
+                    }
         
-        if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions"))
-        {
-            info = dataFromDB.getResolvedBetNotInProgInfo((Bet) jListBets.getSelectedValue());
-        }
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions"))
+                    {
+                        info = dataFromDB.getResolvedBetNotInProgInfo((Bet) jListBets.getSelectedValue());
+                    }
+                    
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets in progressions"))
+                    {
+                        info = dataFromDB.getResolvedBetInProgInfo((BetInProgression) jListBets.getSelectedValue());
+                    }
+                    
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved progressions"))
+                    {
+                        double balance = dataFromDB.getResolvedProgressionBalance((Progression) jListBets.getSelectedValue());
+                        info = "Progression balance: " + Double.toString(balance) + "\n" +
+                                dataFromDB.getProgressionInfo((Progression) jListBets.getSelectedValue());
+                    }
         
-        jTextAreaBetInfo.setText(info);
+                    jTextAreaBetInfo.setText(info);
             }
         });    
     }//GEN-LAST:event_jListBetsValueChanged
@@ -457,9 +483,16 @@ public class BetsManager extends javax.swing.JPanel {
                 DataContainer.id = id;
                 betInfo = DataContainer.dataFromDB.getBetNotInProgInfo(selectedBet);
             }
-            //przypisanie do kontenera - DataContainer
-            //DataContainer.jListEndedBetsToUpdate = jListEndedBetsToUpdate;
-            //DataContainer.jListEndedBetsInProgToUpdate = jListEndedBetsInProgToUpdate;
+            
+            if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
+            {
+                DataContainer.object = DataContainer.listModelEndedBetsInProgToUpdate.getElementAt
+                        (jListEndedBetsInProgToUpdate.getSelectedIndex());
+                BetInProgression selectedBet = (BetInProgression) DataContainer.object;
+                int id = selectedBet.getBetId();
+                DataContainer.id = id;
+                betInfo = DataContainer.dataFromDB.getBetInProgressionInfo(selectedBet);
+            }         
             
             //otwiera okno - wszystkie zmiany zachodza w UpdateBet po kliknieciu Confirm
             UpdateBet updateBet = new UpdateBet();

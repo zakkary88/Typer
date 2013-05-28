@@ -50,6 +50,8 @@ public class QueryManager {
     private PreparedStatement viewProgressionInfoStmt = null;
     
     private PreparedStatement viewResolvedBetNotInProgInfoStmt = null;
+    private PreparedStatement viewResolvedBetInProgInfoStmt = null;
+    private PreparedStatement viewResolvedProgressionBalanceStmt = null;
     
     private PreparedStatement viewTodayBetsStmt = null;
     private PreparedStatement viewEndedBetsToUpdateStmt = null; 
@@ -59,6 +61,7 @@ public class QueryManager {
     private PreparedStatement changeBetStatusStmt = null;
     private PreparedStatement changeWonBetBalanceStmt = null;
     private PreparedStatement changeLostBetBalanceStmt = null;
+    private PreparedStatement endProgressionStmt = null;
     
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
     private static final String countAllProgressionsQuery = "SELECT count(*) FROM Progressions";
@@ -89,16 +92,15 @@ public class QueryManager {
     private static final String viewActiveProgressionsQuery = "SELECT * FROM Progressions "
             + "WHERE ProgressionStatus = 1";
    
-    //     moze byc problem przy OR i AND
     //analogicznie - zakonczone (ze zmienionym statusem) progresje i zaklady
     private static final String viewResolvedBetsNotInProgressionQuery = "SELECT * FROM Bets WHERE "
-            + "Status = 2 OR Status = 3 OR Status = 4 AND PartOfProgression = 0";
+            + "Status IN (2,3,4) AND PartOfProgression = 0";
     private static final String viewResolvedBetsInProgressionQuery = "SELECT b.BetId, "
-            + "b.BetName, b.Date, b.Odd, b.Stake, b.Status, b.Bukmacher, b.Note, b.Balance, b.Type"
+            + "b.BetName, b.Date, b.Odd, b.Stake, b.Status, b.Bukmacher, b.Note, b.Balance, b.Type, "
             + "p.ProgressionId, p.ProgressionName, p.ProgressionStatus "
             + "FROM Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId "
-            + "AND b.Status = 2 OR b.Status = 3 OR b.Status = 4 AND b.PartOfProgression NOT LIKE 0";
-    private static final String viewResolvedProgressionsQuery = "SELECT * FROM "
+            + "AND b.Status IN (2,3,4) AND b.PartOfProgression NOT LIKE 0";
+    private static final String viewResolvedProgressionsQuery = "SELECT * FROM Progressions "
             + "WHERE ProgressionStatus = 2";
     
     private static final String viewBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
@@ -112,6 +114,13 @@ public class QueryManager {
     
     //zapytanie sie powatarza - wykonanie na probe
     private static final String viewResolvedBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
+    private static final String viewResolvedBetInProgInfoQuery = "SELECT b.BetName, b.Date, b.Odd, "
+            + "b.Stake, b.Bukmacher, b.Type, b.Balance, p.ProgressionName "
+            + "FROM Bets b, Progressions p WHERE BetId = ?";
+    private static final String viewResolvedProgressionBalanceQuery = "SELECT SUM(b.Balance) "
+            + "as ProgressionBalance FROM Bets b, Progressions p WHERE ProgressionId = ? " 
+            + "AND b.PartOfProgression = p.ProgressionId";
+            
     
     //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
@@ -132,6 +141,9 @@ public class QueryManager {
             + "Balance = round((Odd - 1.0) * Stake, 2) WHERE BetId = ?";
     private static final String changeLostBetBalanceQuery = "UPDATE Bets SET "
             + "Balance = - Stake WHERE BetId = ?";
+    //zakonczenie progresji (1 - aktywna, 2 - zamknieta)
+    private static final String endProgressionQuery = "UPDATE Progressions SET "
+            + "ProgressionStatus = 2 WHERE ProgressionId = ?";
     
        // odzielnie zapytanie do pobierania NOTE !!!!
     
@@ -219,6 +231,26 @@ public class QueryManager {
         return countAllProgressions() + 1;
     }
     
+    public void endProgression(int progressionId)
+    {
+        try
+        {
+            if(endProgressionStmt == null)
+                endProgressionStmt = conn.prepareStatement(endProgressionQuery);
+            
+            endProgressionStmt.setInt(1, progressionId);
+            
+            int update = endProgressionStmt.executeUpdate();
+            System.out.println(update + " updates. " + "Progression: " + progressionId + 
+                    " ended");
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
     public void changeBetStatus(int newStatus, int betId)
     {
         try
@@ -233,7 +265,7 @@ public class QueryManager {
             System.out.println(update + " updates. " + "Bet: " + betId + 
                     " updated to status: " + newStatus);
                        
-            //update na postawie statusu zakladu (wygrany/przegrany)
+            //update na podstawie statusu zakladu (wygrany/przegrany)
             if(newStatus == 2)  //wygrany
             {
                 if(changeWonBetBalanceStmt == null)
@@ -617,7 +649,6 @@ public class QueryManager {
         }
     }
     
-    //przetestować  !!!!!!!!!!!
     public void viewResolvedBetsInProgression(LinkedList<BetInProgression> resolvedBetsInProgression)
     {
          try
@@ -690,13 +721,12 @@ public class QueryManager {
         }
     }
     
-    //przetestowac  !!!!!!
     public void viewResolvedProgressions(LinkedList<Progression> resolvedProgressions)
     {
         try
         {
             if(viewResolvedProgressionsStmt == null)
-                viewResolvedBetsNotInProgressionStmt = conn.prepareStatement(viewResolvedProgressionsQuery);
+                viewResolvedProgressionsStmt = conn.prepareStatement(viewResolvedProgressionsQuery);
             
             resultSet = viewResolvedProgressionsStmt.executeQuery();
             
@@ -779,6 +809,37 @@ public class QueryManager {
         }
     }
     
+    public String viewResolvedBetInProgInfo(int id)
+    {
+        try
+        {
+            if(viewResolvedBetInProgInfoStmt == null)
+                viewResolvedBetInProgInfoStmt = conn.prepareStatement(viewResolvedBetInProgInfoQuery);
+            
+            viewResolvedBetInProgInfoStmt.setInt(1, id);      
+            resultSet = viewResolvedBetInProgInfoStmt.executeQuery();
+            String info = "";
+            
+            while(resultSet.next())
+            {
+                //SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, b.Balance, p.ProgressionName FROM
+                info = "Name: " + resultSet.getString(1) + "\nBalance: " + resultSet.getDouble(7) +
+                        "\nType: " + resultSet.getString(6) + "\nBukmacher: " + resultSet.getString(5) +
+                        "\nDate: " + resultSet.getString(2) + "\nOdd: " + resultSet.getDouble(3) + 
+                        "\nStake: " + resultSet.getDouble(4) + "\nIn progression: " + resultSet.getString(8);               
+            }
+            
+            resultSet.close();
+            return info;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return "ResolvedBetInProgression Info Error";
+        }
+    }
+    
     public String viewBetInProgressionInfo(int id)
     {
         try
@@ -808,6 +869,29 @@ public class QueryManager {
             for(Throwable t : e)
                 System.out.println(t.getMessage());
             return "BetInProgression Error";
+        }
+    }
+    
+    public double viewResolvedProgressionBalance(int id)
+    {
+        try
+        {
+            if(viewResolvedProgressionBalanceStmt == null)
+                viewResolvedProgressionBalanceStmt = conn.prepareStatement(viewResolvedProgressionBalanceQuery);
+            
+            viewResolvedProgressionBalanceStmt.setInt(1, id);
+            resultSet = viewResolvedProgressionBalanceStmt.executeQuery();
+            
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
         }
     }
     
@@ -854,5 +938,10 @@ public class QueryManager {
             for(Throwable t : e)
                 System.out.println(t.getMessage());
         }
+    }
+    
+    public Connection getConn() 
+    {
+        return conn;
     }
 }

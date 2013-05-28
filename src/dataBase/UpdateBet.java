@@ -4,6 +4,7 @@
  */
 package dataBase;
 
+import java.sql.SQLException;
 import javax.swing.JList;
 import javax.swing.JTextArea;
 
@@ -157,18 +158,12 @@ public class UpdateBet extends javax.swing.JFrame {
 
     private void jButtonUpdateResultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateResultActionPerformed
              
+        int index = 0;
+        
         if(jListEndedBetsToUpdate.getSelectedValue() != null)
-            {
-                // te rzeczy powinny zostac przekazane w jakis sposob !!
-//                Object object = DataContainer.listModelEndedBetsToUpdate.getElementAt
-//                        (jListEndedBetsToUpdate.getSelectedIndex());
-//                Bet selectedBet = (Bet) object;
-//                int id = selectedBet.getBetId();
-//                betInfo = DataContainer.dataFromDB.getBetNotInProgInfo(selectedBet);
-                
-                int index = 0;
+        {              
                 //aktualizacja list
-                //lista zakladow do uaktulanienia  - usuniecie (1 z 4)
+                //lista zakladow do uaktualnienia  - usuniecie (1 z 4)
                 DataContainer.listModelEndedBetsToUpdate.remove     
                         (jListEndedBetsToUpdate.getSelectedIndex());
                
@@ -197,18 +192,55 @@ public class UpdateBet extends javax.swing.JFrame {
                 System.out.println(status);
             }
             
-//            if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
-//            {
-//                Object object = listModelEndedBetsInProgToUpdate.getElementAt(
-//                        jListEndedBetsInProgToUpdate.getSelectedIndex());
-//                
-//                BetInProgression selectedBet = (BetInProgression)object;
-//                betInfo = dataFromDB.getBetInProgressionInfo(selectedBet);
-//                
-//                //TODO 
-//                //analogicznie
-//            }
-            
+            if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
+            {
+                //aktualizacja list
+                //lista zakladow w progresji do uaktualnienia  - usuniecie (1 z 4)
+                DataContainer.listModelEndedBetsInProgToUpdate.remove(
+                        jListEndedBetsInProgToUpdate.getSelectedIndex());
+               
+                //wyczyszczenie modelu, odjecie z listy, wczytanie nowego modelu               
+                //lista aktywnych zakladow (2 z 4) - usuniecie
+                DataContainer.listModelAllActive.clear();
+                index = DataContainer.dataFromDB.getActiveBetIndexById(DataContainer.id);
+                DataContainer.dataFromDB.getBets().remove(index);
+                DataContainer.fillAllActiveBetsList(); 
+                
+                //lista aktywnych zakladow w progresji (3 z 4) - usuniecie
+                DataContainer.listModelActiveInProg.clear();
+                index = DataContainer.dataFromDB.getActiveBetInProgIndexById(DataContainer.id);
+                DataContainer.dataFromDB.getBetsInProg().remove(index);
+                DataContainer.fillActiveBetsInProgression();
+                
+                //lista zakladow zakonczonych (4 z 4) - dodanie
+                BetInProgression betInProg = (BetInProgression) DataContainer.object;
+                DataContainer.listModelResolvedBetsInProg.addElement(betInProg);
+                
+                //aktualizacja list zwiazanych z progresja
+                
+                
+                //tymczasowo wylaczony autocommit
+                try
+                {
+                    DataContainer.dataFromDB.getQueryManager().getConn().setAutoCommit(false);
+                }
+                catch(SQLException e)
+                {
+                    System.out.println("autocommit error");
+                }
+                
+                //aktualizacja bazy danych
+                DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
+                if(status == 2) //wygrany
+                {
+                    int progressionId = betInProg.getProgression().getProgressionId();
+                    DataContainer.dataFromDB.getQueryManager().endProgression(progressionId);
+                }
+                if(status == 3 || status == 4) //przegrany
+                {
+                    //dialog z zapytaniem czy zakonczyc progresje
+                }
+            }           
     }//GEN-LAST:event_jButtonUpdateResultActionPerformed
 
     private void jRadioButtonLostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonLostActionPerformed

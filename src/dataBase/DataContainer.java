@@ -32,6 +32,8 @@ public class DataContainer {
     public static DefaultListModel listModelEndedBetsInProgToUpdate = new DefaultListModel();
     
     public static DefaultListModel listModelResolvedBetsNotInProg = new DefaultListModel();
+    public static DefaultListModel listModelResolvedBetsInProg = new DefaultListModel();
+    public static DefaultListModel listModelResolvedProgressions = new DefaultListModel();
     
     public static void fillAllActiveBetsList()
     {
@@ -90,5 +92,17 @@ public class DataContainer {
     {
         for(Bet b : dataFromDB.getResolvedBetsNotInProg())
             listModelResolvedBetsNotInProg.addElement(b);
+    }
+    
+    public static void fillResolvedBetsInProg()
+    {
+        for(BetInProgression bip : dataFromDB.getResolvedBetsInProg())
+            listModelResolvedBetsInProg.addElement(bip);
+    }
+    
+    public static void fillResolvedProgressions()
+    {
+        for(Progression p : dataFromDB.getResolvedPregressions())
+            listModelResolvedProgressions.addElement(p);
     }
 }
