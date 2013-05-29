@@ -10,7 +10,6 @@
  */
 package dataBase;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 
 /**
@@ -20,19 +19,7 @@ import javax.swing.JFrame;
 public class BetsManager extends javax.swing.JPanel {
 
     private DataFromDB dataFromDB = null; 
-    
-//    private DefaultListModel listModelAllActive = new DefaultListModel();
-//    private DefaultListModel listModelActiveNotInProg = new DefaultListModel();
-//    private DefaultListModel listModelActiveInProg = new DefaultListModel();
-//    private DefaultListModel listModelProgressions = new DefaultListModel();
-    
-//    private DefaultListModel listModelTodayBets = new DefaultListModel();
-//    private DefaultListModel listModelEndedBetsToUpdate = new DefaultListModel();
-//    private DefaultListModel listModelEndedBetsInProgToUpdate = new DefaultListModel();
-
-    //mozliwe, ze nie beda zmiennee potrzebne!!! tylko datacontainer
-    //uaktuanic dzialanie list w oparciu o static datacontainer
-    
+      
     public BetsManager() 
     {
         initComponents();
@@ -84,6 +71,14 @@ public class BetsManager extends javax.swing.JPanel {
         DataContainer.fillResolvedBetsNotInProg();
         DataContainer.fillResolvedBetsInProg();
         DataContainer.fillResolvedProgressions();
+        
+        DataContainer.fillWonBetsNotInProg();
+        DataContainer.fillLostBetsNotInProg();
+        DataContainer.fillCanceledBetsNotInProg();
+        
+        DataContainer.fillWonBetsInProg();
+        DataContainer.fillLostBetsInProg();
+        DataContainer.fillCanceledBetsInProg();
     }
     
     private void fillJComboBoxStatus()
@@ -96,68 +91,33 @@ public class BetsManager extends javax.swing.JPanel {
         
         //zakonczone
         jComboBoxBetStatus.addItem("Resolved bets not in progressions");
+        jComboBoxBetStatus.addItem("Won bets not in progressions");
+        jComboBoxBetStatus.addItem("Lost bets not in progressions");
+        jComboBoxBetStatus.addItem("Canceled bets not in progressions");
+        
         jComboBoxBetStatus.addItem("Resolved bets in progressions");
+        jComboBoxBetStatus.addItem("Won bets in progressions");
+        jComboBoxBetStatus.addItem("Lost bets in progressions");
+        jComboBoxBetStatus.addItem("Canceled bets in progressions");
+           
         jComboBoxBetStatus.addItem("Resolved progressions");
     }
-    
-    // NIE WSZYSTKIE SA UZYWANE
-    /*
-    private void fillAllActiveBetsList()
-    {
-        for(Bet b : dataFromDB.getBets())
-        {
-            listModelAllActive.addElement(b);
-        }
-    }
-    
-    private void fillActiveBetsNotInProgression()
-    {
-        for(Bet bnip : dataFromDB.getBetsNotInProg())
-        {
-            listModelActiveNotInProg.addElement(bnip);
-        }
-    }
-    
-    private void fillActiveBetsInProgression()
-    {   
-        for(BetInProgression bip : dataFromDB.getBetsInProg())
-        {
-            listModelActiveInProg.addElement(bip);
-        }
-    }
-    
-    private void fillActiveProgressions()
-    {     
-        for(Progression p : dataFromDB.getProgressions())
-        {
-            listModelProgressions.addElement(p);
-        }
-    }
-    */
     
     //to tez mozna do container przeniesc, ale setModel idzie do konstuktora u gory
     private void fillTodayBets()
     {
-//        for(Bet b : dataFromDB.getTodayBets())
-//            DataContainer.listModelTodayBets.addElement(b);
         jListTodayBets.setModel(DataContainer.listModelTodayBets);
     }
     
     private void fillEndedBetsToUpdate()
     {
-//        for(Bet b : dataFromDB.getEndedBetsToUpdate())
-//            DataContainer.listModelEndedBetsToUpdate.addElement(b);
         jListEndedBetsToUpdate.setModel(DataContainer.listModelEndedBetsToUpdate);
     }
     
     private void fillEndedBetsInProgToUpdate()
     {
-//        for(BetInProgression bip : dataFromDB.getEndedBetsInProgToUpdate())
-//            DataContainer.listModelEndedBetsInProgToUpdate.addElement(bip);
         jListEndedBetsInProgToUpdate.setModel(DataContainer.listModelEndedBetsInProgToUpdate);
     }
-    
-    
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -402,6 +362,48 @@ public class BetsManager extends javax.swing.JPanel {
                     jListBets.updateUI();
                     jTextAreaBetInfo.setText("");
                 }
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets not in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelWonBetsNotInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets not in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelLostBetsNotInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets not in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelCanceledBetsNotInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+                                   
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelWonBetsInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelLostBetsInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
+                
+                if(jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets in progressions"))
+                {
+                    jListBets.setModel(DataContainer.listModelCanceledBetsInProg);
+                    jListBets.updateUI();
+                    jTextAreaBetInfo.setText("");
+                }
             }
         });
          
@@ -441,12 +443,18 @@ public class BetsManager extends javax.swing.JPanel {
                         info = dataFromDB.getProgressionInfo((Progression)jListBets.getSelectedValue());       
                     }
         
-                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions"))
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets not in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets not in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets not in progressions"))
                     {
                         info = dataFromDB.getResolvedBetNotInProgInfo((Bet) jListBets.getSelectedValue());
                     }
                     
-                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets in progressions"))
+                    if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets in progressions")
+                            || jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets in progressions"))
                     {
                         info = dataFromDB.getResolvedBetInProgInfo((BetInProgression) jListBets.getSelectedValue());
                     }

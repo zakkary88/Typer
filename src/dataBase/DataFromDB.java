@@ -27,6 +27,13 @@ public class DataFromDB {
     private LinkedList<BetInProgression> resolvedBetsInProg = new LinkedList<BetInProgression>();
     private LinkedList<Progression> resolvedProgressions = new LinkedList<Progression>();
     
+    private LinkedList<Bet> wonBetsNotInProg = new LinkedList<Bet>();
+    private LinkedList<Bet> lostBetsNotInProg = new LinkedList<Bet>();
+    private LinkedList<Bet> canceledBetsNotInProg = new LinkedList<Bet>();
+    private LinkedList<BetInProgression> wonBetsInProg = new LinkedList<BetInProgression>();
+    private LinkedList<BetInProgression> lostBetsInProg = new LinkedList<BetInProgression>();
+    private LinkedList<BetInProgression> canceledBetsInProg = new LinkedList<BetInProgression>();
+    
     private double resolvedProgressionBalance = 0.0;
     
     //polaczenie
@@ -52,6 +59,14 @@ public class DataFromDB {
         queryManager.viewResolvedBetsNotInProgression(resolvedBetsNotInProg);
         queryManager.viewResolvedBetsInProgression(resolvedBetsInProg);
         queryManager.viewResolvedProgressions(resolvedProgressions);
+        
+        queryManager.viewWonBetsNotInProgression(wonBetsNotInProg);
+        queryManager.viewLostBetsNotInProgression(lostBetsNotInProg);
+        queryManager.viewCanceledBetsNotInProgression(canceledBetsNotInProg);
+        
+        queryManager.viewWonBetsInProgression(wonBetsInProg);
+        queryManager.viewLostBetsInProgression(lostBetsInProg);
+        queryManager.viewCanceledBetsInProgression(canceledBetsInProg);
     }
     
     //zrzutuje wszystkie zaklady w gore do Bet (niewazne, na tej liscie nie wyswietla sie info)
@@ -208,12 +223,7 @@ public class DataFromDB {
         return resolvedBetsNotInProg;
     }
     
-    public QueryManager getQueryManager() 
-    {
-        return queryManager;
-    }
-    
-    public LinkedList<BetInProgression> getResolvedBetsInProg() 
+        public LinkedList<BetInProgression> getResolvedBetsInProg() 
     {
         return resolvedBetsInProg;
     }
@@ -222,4 +232,51 @@ public class DataFromDB {
     {
         return resolvedProgressions;
     }
+    
+    public LinkedList<Progression> getResolvedProgressions() 
+    {
+        return resolvedProgressions;
+    }
+
+    public LinkedList<Bet> getWonBetsNotInProg() 
+    {
+        return wonBetsNotInProg;
+    }
+
+    public LinkedList<Bet> getLostBetsNotInProg() 
+    {
+        return lostBetsNotInProg;
+    }
+
+    public LinkedList<Bet> getCanceledBetsNotInProg() 
+    {
+        return canceledBetsNotInProg;
+    }
+
+    public LinkedList<BetInProgression> getWonBetsInProg() 
+    {
+        return wonBetsInProg;
+    }
+
+    public LinkedList<BetInProgression> getLostBetsInProg() 
+    {
+        return lostBetsInProg;
+    }
+
+    public LinkedList<BetInProgression> getCanceledBetsInProg() 
+    {
+        return canceledBetsInProg;
+    }
+
+    public double getResolvedProgressionBalance() 
+    {
+        return resolvedProgressionBalance;
+    }
+    
+    public QueryManager getQueryManager() 
+    {
+        return queryManager;
+    }
 }
+    
+

@@ -185,6 +185,12 @@ public class UpdateBet extends javax.swing.JFrame {
                 DataContainer.listModelResolvedBetsNotInProg.addElement(bet);
                 //mozliwe, ze trzeba liste wyczyscic i dodac wszystkie na nowo
                 
+                
+                
+                //AKTUALIZOWAC WON LOST CANCELED
+                
+                
+                
                 //aktualizacja bazy danych
                 DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
                 DataContainer.dataFromDB.getQueryManager().commitChanges();
@@ -216,8 +222,9 @@ public class UpdateBet extends javax.swing.JFrame {
                 BetInProgression betInProg = (BetInProgression) DataContainer.object;
                 DataContainer.listModelResolvedBetsInProg.addElement(betInProg);
                 
-                //aktualizacja list zwiazanych z progresja
+                //aktualizacja list zwiazanych z progresja      ?????!!!!!!!!!!
                 
+                //AKTUALIZOWAC WON LOST CANCELED
                 
                 //tymczasowo wylaczony autocommit
                 try

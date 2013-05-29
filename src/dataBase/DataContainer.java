@@ -35,6 +35,13 @@ public class DataContainer {
     public static DefaultListModel listModelResolvedBetsInProg = new DefaultListModel();
     public static DefaultListModel listModelResolvedProgressions = new DefaultListModel();
     
+    public static DefaultListModel listModelWonBetsNotInProg = new DefaultListModel();
+    public static DefaultListModel listModelLostBetsNotInProg = new DefaultListModel();
+    public static DefaultListModel listModelCanceledBetsNotInProg = new DefaultListModel();
+    public static DefaultListModel listModelWonBetsInProg = new DefaultListModel();
+    public static DefaultListModel listModelLostBetsInProg = new DefaultListModel();
+    public static DefaultListModel listModelCanceledBetsInProg = new DefaultListModel();
+    
     public static void fillAllActiveBetsList()
     {
         for(Bet b : dataFromDB.getBets())
@@ -104,5 +111,41 @@ public class DataContainer {
     {
         for(Progression p : dataFromDB.getResolvedPregressions())
             listModelResolvedProgressions.addElement(p);
+    }
+    
+    public static void fillWonBetsNotInProg()
+    {
+        for(Bet wb : dataFromDB.getWonBetsNotInProg())
+            listModelWonBetsNotInProg.addElement(wb);
+    }
+    
+    public static void fillLostBetsNotInProg()
+    {
+        for(Bet lb : dataFromDB.getLostBetsNotInProg())
+            listModelLostBetsNotInProg.addElement(lb);
+    }
+    
+    public static void fillCanceledBetsNotInProg()
+    {
+        for(Bet cb : dataFromDB.getCanceledBetsNotInProg())
+            listModelCanceledBetsNotInProg.addElement(cb);
+    }
+    
+    public static void fillWonBetsInProg()
+    {
+        for(BetInProgression wbip : dataFromDB.getWonBetsInProg())
+            listModelWonBetsInProg.addElement(wbip);
+    }
+    
+    public static void fillLostBetsInProg()
+    {
+        for(BetInProgression lbip : dataFromDB.getLostBetsInProg())
+            listModelLostBetsInProg.addElement(lbip);
+    }
+    
+    public static void fillCanceledBetsInProg()
+    {
+        for(BetInProgression cbip : dataFromDB.getCanceledBetsInProg())
+            listModelCanceledBetsInProg.addElement(cbip);
     }
 }
