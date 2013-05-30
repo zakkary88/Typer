@@ -24,6 +24,6 @@ public class Typer {
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         //ConnectionStatic.closeConnection();
-        mainFrame.getConnectionManager().closeConnection();
+        //mainFrame.getConnectionManager().closeConnection();
     }
 }

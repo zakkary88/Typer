@@ -162,44 +162,53 @@ public class UpdateBet extends javax.swing.JFrame {
         
         if(jListEndedBetsToUpdate.getSelectedValue() != null)
         {              
+                
+            if(status != 1) //status inni niz zaklad nierostrzygniety
+            {
                 //aktualizacja list
-                //lista zakladow do uaktualnienia  - usuniecie (1 z 4)
+                //lista zakladow do uaktualnienia  - usuniecie (1 z 5)
                 DataContainer.listModelEndedBetsToUpdate.remove     
                         (jListEndedBetsToUpdate.getSelectedIndex());
                
                 //wyczyszczenie modelu, odjecie z listy, wczytanie nowego modelu               
-                //lista aktywnych zakladow (2 z 4) - usuniecie
+                //lista aktywnych zakladow (2 z 5) - usuniecie
                 DataContainer.listModelAllActive.clear();
                 index = DataContainer.dataFromDB.getActiveBetIndexById(DataContainer.id);
                 DataContainer.dataFromDB.getBets().remove(index);
                 DataContainer.fillAllActiveBetsList();
 
-                //lista aktywnych zakladow nie w progresji (3 z 4) - usuniecie
+                //lista aktywnych zakladow nie w progresji (3 z 5) - usuniecie
                 DataContainer.listModelActiveNotInProg.clear();
                 index = DataContainer.dataFromDB.getActiveBetNotInProgIndexById(DataContainer.id);
                 DataContainer.dataFromDB.getBetsNotInProg().remove(index);
                 DataContainer.fillActiveBetsNotInProgression();
                 
-                //lista zakladow zakonczonych (4 z 4) - dodanie
+                //lista zakladow zakonczonych (4 z 5) - dodanie
                 Bet bet = (Bet) DataContainer.object;
                 DataContainer.listModelResolvedBetsNotInProg.addElement(bet);
-                //mozliwe, ze trzeba liste wyczyscic i dodac wszystkie na nowo
+                       
+                //dodanie do 1 z 3 list (wygrany, przegrane, anulowane) (5 z 5)
+                if(status == 2)
+                    DataContainer.listModelWonBetsNotInProg.addElement(bet);
                 
+                if(status == 3)
+                    DataContainer.listModelLostBetsNotInProg.addElement(bet);
                 
-                
-                //AKTUALIZOWAC WON LOST CANCELED
-                
-                
-                
+                if(status == 4)
+                    DataContainer.listModelCanceledBetsNotInProg.addElement(bet);
+                              
                 //aktualizacja bazy danych
                 DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
                 DataContainer.dataFromDB.getQueryManager().commitChanges();
                 
                 System.out.println(status);
             }
+        }
             
             if(jListEndedBetsInProgToUpdate.getSelectedValue() != null)
             {
+                if(status != 1) //status inni niz zaklad nierostrzygniety
+                {
                 //aktualizacja list
                 //lista zakladow w progresji do uaktualnienia  - usuniecie (1 z 4)
                 DataContainer.listModelEndedBetsInProgToUpdate.remove(
@@ -221,11 +230,10 @@ public class UpdateBet extends javax.swing.JFrame {
                 //lista zakladow zakonczonych (4 z 4) - dodanie
                 BetInProgression betInProg = (BetInProgression) DataContainer.object;
                 DataContainer.listModelResolvedBetsInProg.addElement(betInProg);
-                
-                //aktualizacja list zwiazanych z progresja      ?????!!!!!!!!!!
-                
-                //AKTUALIZOWAC WON LOST CANCELED
-                
+                               
+                //dodanie do 1 z 3 list (wygrany, przegrane, anulowane) (5 z 5)
+                //aktualizacja bazy danych
+               
                 //tymczasowo wylaczony autocommit
                 try
                 {
@@ -236,16 +244,28 @@ public class UpdateBet extends javax.swing.JFrame {
                     System.out.println("autocommit error");
                 }
                 
-                //aktualizacja bazy danych
                 DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
-                if(status == 2) //wygrany
+                if(status == 2)
                 {
+                    DataContainer.listModelWonBetsInProg.addElement(betInProg);
+                    //baza danych
                     int progressionId = betInProg.getProgression().getProgressionId();
                     DataContainer.dataFromDB.getQueryManager().endProgression(progressionId);
+                    
+                    //lista progresji
+                    DataContainer.listModelResolvedProgressions.addElement(betInProg.getProgression());
                 }
-                if(status == 3 || status == 4) //przegrany
-                {
-                    //dialog z zapytaniem czy zakonczyc progresje
+                
+                //aktualizacja list zwiazanych z progresja      
+                
+                if(status == 3)
+                    DataContainer.listModelLostBetsInProg.addElement(betInProg);
+                //dialog z zapytaniem czy zakonczyc progresje
+                
+                if(status == 4)
+                    DataContainer.listModelCanceledBetsInProg.addElement(betInProg);
+                //dialog z zapytaniem czy zakonczyc progresje
+                        
                 }
             }           
     }//GEN-LAST:event_jButtonUpdateResultActionPerformed

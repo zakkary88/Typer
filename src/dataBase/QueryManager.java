@@ -80,8 +80,9 @@ public class QueryManager {
     private static final String getIdForBetInProgressionExistingQuery = "SELECT ProgressionId FROM Progressions "
             + "WHERE progressionName = ?";
     
-    //nazwy progresji
-    private static final String viewProgressionsNamesQuery = "SELECT ProgressionName FROM Progressions";
+    //nazwy progresji aktywnych
+    private static final String viewProgressionsNamesQuery = "SELECT ProgressionName FROM Progressions "
+            + "WHERE ProgressionStatus = 1";
     //wszystkie aktywne zakłady
     private static final String viewAllActiveBetsQuery = "SELECT * FROM Bets WHERE Status = 1";
     //wszystkie aktywne zaklady, ktore nie sa częścią progresji
@@ -138,9 +139,10 @@ public class QueryManager {
     private static final String viewBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
     private static final String viewBetInProgressionInfoQuery = 
             "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, p.ProgressionName "
-            + "FROM Bets b, Progressions p WHERE BetId = ?";
+            + "FROM Bets b, Progressions p WHERE BetId = ? "
+            + "AND b.PartOfProgression = p.ProgressionId";
     private static final String viewProgressionInfoQuery = 
-            "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, p.ProgressionName "
+            "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, b.Balance, p.ProgressionName "
             + "FROM Bets b, Progressions p WHERE ProgressionId = ? "
             + "AND b.PartOfProgression = p.ProgressionId";
     
@@ -1142,14 +1144,15 @@ public class QueryManager {
             
             viewProgressionInfoStmt.setInt(1, id);
             resultSet = viewProgressionInfoStmt.executeQuery();
-            String info = "Progression name: " + resultSet.getString(7);
+            String info = "Progression name: " + resultSet.getString(8);
             
             while(resultSet.next())
             {
               //  "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, p.ProgressionName "
               //+ "FROM Bets b, Progressions p WHERE ProgressionId = ? "
               //+ "AND b.PartOfProgression = p.ProgressionId";
-                info += "\nBet name: " + resultSet.getString(1) + "\"nType: " + resultSet.getString(6) +
+                info += "\nBet name: " + resultSet.getString(1) + "\tType: " + resultSet.getString(6) +
+                        "\tBalance: " + resultSet.getDouble(7) +
                         "\tDate: " + resultSet.getString(2) + "\tOdd: " + resultSet.getDouble(3) + 
                         "\tStake: " + resultSet.getDouble(4) + "\tBukmacher: " + resultSet.getString(5);
             }

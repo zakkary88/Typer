@@ -11,8 +11,8 @@ package dataBase;
 public class NewBet extends javax.swing.JPanel {
 
     
-    private ConnectionManager connectionManager = new ConnectionManager();
-    private QueryManager queryManager = new QueryManager(connectionManager.getConnection());
+//    private ConnectionManager connectionManager = new ConnectionManager();
+//    private QueryManager queryManager = new QueryManager(connectionManager.getConnection());
     private Calendar calendar = null;
     
     public NewBet() 
@@ -298,8 +298,7 @@ public class NewBet extends javax.swing.JPanel {
         jCheckBoxProgression.setText("is part of progression");
         jPanelProgression.setVisible(false);
         jButtonAddBet.setText("Add bet");
-        
-        
+              
         jRadioButtonNewProgression.setText("New progression");
         jRadioButtonExistingProgression.setText("Existing progression");
         buttonGroupProgression.add(jRadioButtonExistingProgression);
@@ -310,7 +309,7 @@ public class NewBet extends javax.swing.JPanel {
         jTextFieldProgressionName.setEnabled(false);
         jComboBoxExistingProgression.setEnabled(true);
         
-        queryManager.fillComboBoxExisitingProgression(jComboBoxExistingProgression);
+        DataContainer.dataFromDB.getQueryManager().fillComboBoxExisitingProgression(jComboBoxExistingProgression);
         fillComboBoxBukmacher();
         fillComboBoxType();
         calendar.fillComboBoxDateTime();
@@ -344,7 +343,10 @@ public class NewBet extends javax.swing.JPanel {
         String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
         String note = jTextAreaNote.getText();
         String type = jComboBoxType.getSelectedItem().toString();
-
+        
+        int betId = 0;
+        int progressionId = 0;
+ 
         if(jCheckBoxProgression.isSelected())
         {
             String progressionName = "";
@@ -352,29 +354,71 @@ public class NewBet extends javax.swing.JPanel {
             if(jRadioButtonExistingProgression.isSelected())
             {
                 progressionName = jComboBoxExistingProgression.getSelectedItem().toString();
-                queryManager.addBetInProgressionExisting(betName, date, odd, stake, 
+                DataContainer.dataFromDB.getQueryManager().addBetInProgressionExisting(betName, date, odd, stake, 
                         bukmacher, note, type, progressionName);
+                
+                //tworzy obiekt, ktory zostanie dodany do listy
+                //id - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
+                betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
+                progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
+                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake, 
+                        bukmacher, note, type, progressionId , progressionName, 1);
+                Bet bet = (Bet) betInProg;
+                
+                //aktualizacja list              
+                //aktywne zaklady w progresji
+                DataContainer.listModelActiveInProg.addElement(betInProg);
+                //wszystkie aktywne zaklady
+                DataContainer.listModelAllActive.addElement(bet);
             }
 
             if(jRadioButtonNewProgression.isSelected())
             {
                 progressionName = jTextFieldProgressionName.getText();
-                queryManager.addBetInProgressionNew(betName, date, odd, stake, 
+                DataContainer.dataFromDB.getQueryManager().addBetInProgressionNew(betName, date, odd, stake, 
                         bukmacher, note, type, progressionName);
+                
+                //tworzy obiekt, ktory zostanie dodany do listy
+                //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
+                //progressionId - jak wyzej
+                betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
+                progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
+                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake, 
+                        bukmacher, note, type, progressionId , progressionName, 1);
+                Bet bet = (Bet) betInProg;
+                
+                Progression prog = new Progression(progressionId, progressionName, 1);
+                
+                //wszystkie aktywne zaklady
+                DataContainer.listModelAllActive.addElement(bet);
+                //aktywne zaklady w progresji
+                DataContainer.listModelActiveInProg.addElement(betInProg);
+                //aktywne progresje
+                DataContainer.listModelProgressions.addElement(prog);
             }
         }
         else
         {
-            queryManager.addBet(betName, date, odd, stake, bukmacher, note, type);
+            DataContainer.dataFromDB.getQueryManager().addBet(betName, date, odd, stake, bukmacher, note, type);
+            
+            //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
+            betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
+            
+            Bet bet = new Bet(betId, betName, date, odd, stake, betId, bukmacher, note, stake, type);
+            
+            //wszystkie aktywne zaklady
+            DataContainer.listModelAllActive.addElement(bet);
+            //aktywne zaklady nie w progresji
+            DataContainer.listModelActiveNotInProg.addElement(bet);
         }
     }//GEN-LAST:event_jButtonAddBetActionPerformed
 
     private void jCheckBoxProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxProgressionActionPerformed
 
         if(jCheckBoxProgression.isSelected())
-        jPanelProgression.setVisible(true);
+            jPanelProgression.setVisible(true);
         else
-        jPanelProgression.setVisible(false);
+            jPanelProgression.setVisible(false);
     }//GEN-LAST:event_jCheckBoxProgressionActionPerformed
 
     private void jRadioButtonNewProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNewProgressionActionPerformed
