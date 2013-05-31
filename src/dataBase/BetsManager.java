@@ -56,7 +56,6 @@ public class BetsManager extends javax.swing.JPanel {
         jListTodayBets.setEnabled(false);
     }
        
-    //zmiany -  nie bylo datacontainer
     private void fillLists()
     {
         DataContainer.fillActiveBetsInProgression();
@@ -235,6 +234,11 @@ public class BetsManager extends javax.swing.JPanel {
         jButtonViewNote.setText("jButton1");
 
         jButtonEdit.setText("jButton2");
+        jButtonEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonEditActionPerformed(evt);
+            }
+        });
 
         jButtonDelete.setText("jButton3");
 
@@ -311,9 +315,8 @@ public class BetsManager extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jButtonDelete, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jButtonEdit, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
-                                .addComponent(jButtonViewNote, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(jButtonEdit, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                            .addComponent(jButtonViewNote, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
                         .addComponent(jLabelInformation))
                     .addComponent(jScrollPane1))
@@ -574,6 +577,40 @@ public class BetsManager extends javax.swing.JPanel {
         NewBet newBet = new NewBet();
         addBetFrame.add(newBet);
     }//GEN-LAST:event_jButtonAddNewBetActionPerformed
+
+    private void jButtonEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEditActionPerformed
+        
+        if(jListBets.getSelectedValue() == null)
+        {
+            jLabelInformation.setText("Choose position from the list on left side.");
+        }
+        else
+        {
+            jLabelInformation.setText("");
+            
+            //IF (zalezy jaka lista zostala wybrana
+            
+            //dla bet
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
+            {
+                DataContainer.object = DataContainer.listModelActiveNotInProg.getElementAt(
+                        jListBets.getSelectedIndex());
+                Bet selectedBet = (Bet) DataContainer.object;
+                int id = selectedBet.getBetId();
+                DataContainer.id = id;
+
+                JFrame editBetFrame = new JFrame();
+                editBetFrame.setVisible(true);
+                editBetFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                editBetFrame.setSize(445, 445);
+                editBetFrame.setTitle("Edit");
+
+                EditBet editBet = new EditBet();
+                editBetFrame.add(editBet);
+            }
+
+        }
+    }//GEN-LAST:event_jButtonEditActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddNewBet;

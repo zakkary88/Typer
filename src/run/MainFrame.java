@@ -18,43 +18,25 @@ import dataBase.QueryManager;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-//    private ConnectionManager connectionManager = null; 
-//    private QueryManager queryManager = null;
-//    
     private BetsManager betsManager = null;
     private CoverBooker coverBooker = null;
     private ProgressiveBooker progressiveBooker = null;
-    //private NewBet newBet = null;
-    //private CurrentEvents currentEvents = null;
-    
     
     public MainFrame() {
         initComponents();
         
         this.setTitle("Typer");
-              
-//        connectionManager = new ConnectionManager();
-//        queryManager = new QueryManager(connectionManager.getConnection());
-//        //queryManager = new QueryManager();
-        
+                     
         betsManager = new BetsManager();
-        //newBet = new NewBet();
-        //currentEvents = new CurrentEvents();
-          
         coverBooker = new CoverBooker();
         progressiveBooker = new ProgressiveBooker();
                
-        //jTabbedPaneMenu.addTab("Current Events", currentEvents);
         jTabbedPaneMenu.addTab("Bets Manager", betsManager);
-        //jTabbedPaneMenu.addTab("New Bet", newBet);
         jTabbedPaneMenu.addTab("Progression Simulator", progressiveBooker);
         jTabbedPaneMenu.addTab("Cover Booker Calculator", coverBooker);
     }
     
-//    public ConnectionManager getConnectionManager() 
-//    {
-//        return connectionManager;
-//    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.

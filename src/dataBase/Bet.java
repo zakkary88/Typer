@@ -25,11 +25,10 @@ public class Bet {
 
     protected double balance;
     
-    //int partOfProgression - istnieje w bazaie danych / 0 - nie jest czescia progresji / inna licza - progressionId     
-    //w tabeli znajduje sie jako klucz obcy laczacy zaklad z progresja
+    protected int partOfProgression; // 0 - nie jest czescia progresji / inna licza - progressionId     
+
     
-    // ROZWAZYC DODANIE PART OF PROGRESSION jako pola !!!!!!!!!!!!
-   
+    public Bet() {}
     
     public Bet(int betId, String betName, String date, double odd, double stake, 
             String bukmacher, String note, String type)
@@ -39,14 +38,33 @@ public class Bet {
         this.date = date;
         this.odd = odd;
         this.stake = stake;
-        this.betStatus = 1;     //jakos nierozstrzygniety
         this.bukmacher = bukmacher;
         this.note = note;
         this.type = type;
+     
+        this.partOfProgression = 0;     //TODO moze powodowac problemy!!!!
+        this.betStatus = 1;     //jakos nierozstrzygniety
         this.balance = 0;
     }
     
     public Bet(int betId, String betName, String date, double odd, double stake, 
+            int partOfProgression, String bukmacher, String note, String type)
+    {
+        this.betId = betId;
+        this.betName = betName;
+        this.date = date;
+        this.odd = odd;
+        this.stake = stake;
+        this.partOfProgression = partOfProgression;
+        this.bukmacher = bukmacher;
+        this.note = note;
+        this.type = type;
+     
+        this.betStatus = 1;     //jakos nierozstrzygniety
+        this.balance = 0;
+    }
+    
+    public Bet(int betId, String betName, String date, double odd, double stake, int partOfProgression,
             int betStatus, String bukmacher, String note, double balance, String type)
     {
         this.betId = betId;
@@ -54,6 +72,7 @@ public class Bet {
         this.date = date;
         this.odd = odd;
         this.stake = stake;
+        this.partOfProgression = partOfProgression;     //TODO moze powodowac problemy!!!!
         this.betStatus = betStatus;     
         this.bukmacher = bukmacher;
         this.note = note;

@@ -71,12 +71,14 @@ public class QueryManager {
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
     private static final String countAllProgressionsQuery = "SELECT count(*) FROM Progressions";
     
+    //INSERTs
     //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
     // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
-    // 0 - nie jest czescia progresji, 1 - status nierozstrzygniety, 0 - saldo narazie na 0
+    // 0 - nie jest czescia progresji, 1 - status nierozstrzygniety, 0 - balance narazie na 0
     private static final String addBetQuery = "INSERT INTO Bets VALUES(?,?,?,?,?,0,1,?,?,0,?)";
     private static final String addBetInProgressionQuery = "INSERT INTO Bets Values(?,?,?,?,?,?,1,?,?,0,?)"; 
     private static final String addProgressionQuery = "INSERT INTO Progressions VALUES(?,?,1)"; // 1 - trwa
+   
     private static final String getIdForBetInProgressionExistingQuery = "SELECT ProgressionId FROM Progressions "
             + "WHERE progressionName = ?";
     
@@ -168,7 +170,7 @@ public class QueryManager {
             + "Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId AND "
             + "SUBSTR(b.Date,0,11) < date() AND b.Status  = 1";
     
-    //UPDATE
+    //UPDATEs
     private static final String changeBetStatusQuery = "UPDATE Bets SET Status = ? "
             + "WHERE BetId = ?";
     private static final String changeWonBetBalanceQuery = "UPDATE Bets SET "
@@ -458,8 +460,7 @@ public class QueryManager {
                 System.out.println(t.getMessage());
         }      
     }
-    
-    
+       
     public void viewEndedBetsToUpdate(LinkedList<Bet> endedBetsToUpdate)
     {
         try
@@ -511,8 +512,8 @@ public class QueryManager {
                         resultSet.getString(3), resultSet.getDouble(4), 
                         resultSet.getDouble(5),resultSet.getString(6),
                         resultSet.getString(7), resultSet.getString(8)),
-                                new Progression(resultSet.getInt(9), 
-                                resultSet.getString(10), resultSet.getInt(11)));
+                                resultSet.getInt(9), 
+                                resultSet.getString(10), resultSet.getInt(11));
                 
                 endedBetsInProgToUpdate.add(endedBetInProg);        
                 }              
@@ -614,6 +615,40 @@ public class QueryManager {
                 System.out.println(t.getMessage());
         }      
     }
+      
+    public Bet getBetNotInProg(int id)
+    {
+        try
+        {
+            if(viewBetNotInProgInfoStmt == null)
+                viewBetNotInProgInfoStmt = conn.prepareStatement(viewBetNotInProgInfoQuery);
+            
+            viewBetNotInProgInfoStmt.setInt(1, id);
+            resultSet = viewBetNotInProgInfoStmt.executeQuery();
+            Bet bet = null;
+            
+            while(resultSet.next())
+            {
+                //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
+                // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
+                //public Bet(int betId, String betName, String date, double odd, double stake, 
+                //String bukmacher, String note, String type)
+                bet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5), resultSet.getInt(6),
+                        resultSet.getInt(7), resultSet.getString(8),
+                        resultSet.getString(9), resultSet.getDouble(10),
+                        resultSet.getString(11));
+            }
+            return bet;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return new Bet();
+        } 
+    }
     
     public void viewActiveBetsNotInProgression(LinkedList<Bet> betsNotInProg)
     {
@@ -668,8 +703,8 @@ public class QueryManager {
                         resultSet.getString(3), resultSet.getDouble(4), 
                         resultSet.getDouble(5),resultSet.getString(6),
                         resultSet.getString(7), resultSet.getString(8)),
-                                new Progression(resultSet.getInt(9), 
-                                resultSet.getString(10), resultSet.getInt(11)));
+                                resultSet.getInt(9), 
+                                resultSet.getString(10), resultSet.getInt(11));
                 
                 betsInProgression.add(newBetInProg);
             }
@@ -849,7 +884,7 @@ public class QueryManager {
                 //int betStatus, String bukmacher, String note, double balance, String type)
                 Bet wonBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
                         resultSet.getString(3), resultSet.getDouble(4), 
-                        resultSet.getDouble(5), resultSet.getInt(7),
+                        resultSet.getDouble(5), resultSet.getInt(6), resultSet.getInt(7),
                         resultSet.getString(8), resultSet.getString(9), 
                         resultSet.getDouble(10), resultSet.getString(11));
 
@@ -881,7 +916,7 @@ public class QueryManager {
                 //int betStatus, String bukmacher, String note, double balance, String type)
                 Bet lostBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
                         resultSet.getString(3), resultSet.getDouble(4), 
-                        resultSet.getDouble(5), resultSet.getInt(7),
+                        resultSet.getDouble(5), resultSet.getInt(6), resultSet.getInt(7),
                         resultSet.getString(8), resultSet.getString(9), 
                         resultSet.getDouble(10), resultSet.getString(11));
 
@@ -913,7 +948,7 @@ public class QueryManager {
                 //int betStatus, String bukmacher, String note, double balance, String type)
                 Bet canceledBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
                         resultSet.getString(3), resultSet.getDouble(4), 
-                        resultSet.getDouble(5), resultSet.getInt(7),
+                        resultSet.getDouble(5), resultSet.getInt(6), resultSet.getInt(7),
                         resultSet.getString(8), resultSet.getString(9), 
                         resultSet.getDouble(10), resultSet.getString(11));
 
@@ -945,7 +980,7 @@ public class QueryManager {
             //int betStatus, String bukmacher, String note, double balance, String type)
                 Bet newBet = new Bet(resultSet.getInt(1), resultSet.getString(2), 
                         resultSet.getString(3), resultSet.getDouble(4), 
-                        resultSet.getDouble(5), resultSet.getInt(7),
+                        resultSet.getDouble(5), resultSet.getInt(6), resultSet.getInt(7),
                         resultSet.getString(8), resultSet.getString(9), 
                         resultSet.getDouble(10), resultSet.getString(11));
 

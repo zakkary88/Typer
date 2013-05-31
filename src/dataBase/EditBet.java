@@ -8,18 +8,19 @@ package dataBase;
  *
  * @author Marcin
  */
-public class NewBet extends javax.swing.JPanel {
-
+public class EditBet extends javax.swing.JPanel {
+   
     private Calendar calendar = null;
+    private Bet betNotInProg = null;
     
-    public NewBet() 
-    {
+    public EditBet() {
+        
         initComponents();
         calendar = new Calendar(jComboBoxDay, jComboBoxMonth, jComboBoxYear, jComboBoxHour, jComboBoxMinute);
         setFields();
         loadDataFromDB();
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,13 +31,14 @@ public class NewBet extends javax.swing.JPanel {
     private void initComponents() {
 
         buttonGroupProgression = new javax.swing.ButtonGroup();
-        jPanelNewBet = new javax.swing.JPanel();
+        buttonGroupStatus = new javax.swing.ButtonGroup();
+        jPanelEditBet = new javax.swing.JPanel();
         jTextFieldOdd = new javax.swing.JTextField();
         jLabelTime = new javax.swing.JLabel();
         jComboBoxMinute = new javax.swing.JComboBox();
         jLabelBetName = new javax.swing.JLabel();
         jLabelNote = new javax.swing.JLabel();
-        jButtonAddBet = new javax.swing.JButton();
+        jButtonSaveChanges = new javax.swing.JButton();
         jLabelBukmacher = new javax.swing.JLabel();
         jLabelDate = new javax.swing.JLabel();
         jTextFieldBetName = new javax.swing.JTextField();
@@ -60,6 +62,10 @@ public class NewBet extends javax.swing.JPanel {
         jLabelNewProgressionName = new javax.swing.JLabel();
         jComboBoxExistingProgression = new javax.swing.JComboBox();
         jTextFieldProgressionName = new javax.swing.JTextField();
+        jRadioButtonWon = new javax.swing.JRadioButton();
+        jRadioButtonLost = new javax.swing.JRadioButton();
+        jRadioButtonCanceled = new javax.swing.JRadioButton();
+        jRadioButtonUnresolved = new javax.swing.JRadioButton();
 
         jLabelTime.setText("jLabel1");
 
@@ -67,10 +73,10 @@ public class NewBet extends javax.swing.JPanel {
 
         jLabelNote.setText("jLabel1");
 
-        jButtonAddBet.setText("jButton1");
-        jButtonAddBet.addActionListener(new java.awt.event.ActionListener() {
+        jButtonSaveChanges.setText("jButton1");
+        jButtonSaveChanges.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAddBetActionPerformed(evt);
+                jButtonSaveChangesActionPerformed(evt);
             }
         });
 
@@ -97,6 +103,7 @@ public class NewBet extends javax.swing.JPanel {
 
         jLabelTitle.setText("jLabel1");
 
+        buttonGroupProgression.add(jRadioButtonNewProgression);
         jRadioButtonNewProgression.setText("jRadioButton1");
         jRadioButtonNewProgression.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -104,6 +111,7 @@ public class NewBet extends javax.swing.JPanel {
             }
         });
 
+        buttonGroupProgression.add(jRadioButtonExistingProgression);
         jRadioButtonExistingProgression.setText("jRadioButton2");
         jRadioButtonExistingProgression.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -150,21 +158,41 @@ public class NewBet extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout jPanelNewBetLayout = new javax.swing.GroupLayout(jPanelNewBet);
-        jPanelNewBet.setLayout(jPanelNewBetLayout);
-        jPanelNewBetLayout.setHorizontalGroup(
-            jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 431, Short.MAX_VALUE)
-            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanelNewBetLayout.createSequentialGroup()
+        buttonGroupStatus.add(jRadioButtonWon);
+        jRadioButtonWon.setText("jRadioButton1");
+
+        buttonGroupStatus.add(jRadioButtonLost);
+        jRadioButtonLost.setText("jRadioButton2");
+
+        buttonGroupStatus.add(jRadioButtonCanceled);
+        jRadioButtonCanceled.setText("jRadioButton3");
+
+        buttonGroupStatus.add(jRadioButtonUnresolved);
+        jRadioButtonUnresolved.setText("jRadioButton4");
+
+        javax.swing.GroupLayout jPanelEditBetLayout = new javax.swing.GroupLayout(jPanelEditBet);
+        jPanelEditBet.setLayout(jPanelEditBetLayout);
+        jPanelEditBetLayout.setHorizontalGroup(
+            jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelEditBetLayout.createSequentialGroup()
+                .addContainerGap(290, Short.MAX_VALUE)
+                .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jRadioButtonUnresolved)
+                    .addComponent(jRadioButtonCanceled)
+                    .addComponent(jRadioButtonLost)
+                    .addComponent(jRadioButtonWon)
+                    .addComponent(jButtonSaveChanges, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelEditBetLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabelTitle)
-                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
+                        .addGroup(jPanelEditBetLayout.createSequentialGroup()
                             .addGap(26, 26, 26)
-                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(jLabelBetName)
                                         .addComponent(jLabelOdd)
                                         .addComponent(jLabelStake)
@@ -173,88 +201,90 @@ public class NewBet extends javax.swing.JPanel {
                                         .addComponent(jLabelNote)
                                         .addComponent(jLabelTime)
                                         .addComponent(jLabelType))
-                                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
+                                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(jPanelEditBetLayout.createSequentialGroup()
                                             .addGap(44, 44, 44)
-                                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                 .addComponent(jScrollPane1)
-                                                .addComponent(jComboBoxBukmacher, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGap(0, 0, Short.MAX_VALUE))
-                                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                                    .addGap(44, 44, 44)
-                                                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(jTextFieldOdd)
-                                                        .addComponent(jTextFieldBetName)
-                                                        .addComponent(jTextFieldStake, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                                    .addGap(18, 18, 18)
-                                                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                                            .addComponent(jComboBoxHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                            .addComponent(jComboBoxMinute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                                                            .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                            .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                            .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
-                                            .addComponent(jButtonAddBet, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                                .addComponent(jComboBoxBukmacher, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                                            .addGap(44, 44, 44)
+                                            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                    .addComponent(jTextFieldOdd)
+                                                    .addComponent(jTextFieldStake, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(jTextFieldBetName, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                                            .addGap(18, 18, 18)
+                                            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                                                    .addComponent(jComboBoxHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(jComboBoxMinute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                                                    .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                                 .addComponent(jCheckBoxProgression)))
-                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
+                        .addGroup(jPanelEditBetLayout.createSequentialGroup()
                             .addGap(44, 44, 44)
                             .addComponent(jPanelProgression, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addContainerGap()))
+                    .addContainerGap(100, Short.MAX_VALUE)))
         );
-        jPanelNewBetLayout.setVerticalGroup(
-            jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 444, Short.MAX_VALUE)
-            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanelNewBetLayout.createSequentialGroup()
+        jPanelEditBetLayout.setVerticalGroup(
+            jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelEditBetLayout.createSequentialGroup()
+                .addGap(101, 101, 101)
+                .addComponent(jButtonSaveChanges, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jRadioButtonWon)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jRadioButtonLost)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jRadioButtonCanceled)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jRadioButtonUnresolved)
+                .addContainerGap(152, Short.MAX_VALUE))
+            .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelEditBetLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                            .addComponent(jLabelTitle)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabelBetName)
-                                .addComponent(jTextFieldBetName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabelDate)
-                                .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabelTime)
-                                .addComponent(jComboBoxHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jComboBoxMinute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabelType)
-                                .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(jPanelNewBetLayout.createSequentialGroup()
-                            .addGap(35, 35, 35)
-                            .addComponent(jButtonAddBet, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabelTitle)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelBetName)
+                        .addComponent(jTextFieldBetName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelDate)
+                        .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelTime)
+                        .addComponent(jComboBoxHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxMinute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelType)
+                        .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabelOdd, javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jTextFieldOdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabelStake, javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jTextFieldStake, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabelBukmacher, javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jComboBoxBukmacher, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(jPanelNewBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelEditBetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabelNote))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -270,18 +300,18 @@ public class NewBet extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jPanelNewBet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanelEditBet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jPanelNewBet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanelEditBet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
- 
+
     private void setFields()
     {
         jLabelTitle.setText("Set information for new bet");
@@ -295,7 +325,12 @@ public class NewBet extends javax.swing.JPanel {
         jLabelType.setText("Type:");
         jCheckBoxProgression.setText("is part of progression");
         jPanelProgression.setVisible(false);
-        jButtonAddBet.setText("Add bet");
+        jButtonSaveChanges.setText("Save changes");
+        
+        jRadioButtonWon.setText("Won");
+        jRadioButtonLost.setText("Lost");
+        jRadioButtonCanceled.setText("Canceled/Postponed");
+        jRadioButtonUnresolved.setText("Unresolved");
               
         jRadioButtonNewProgression.setText("New progression");
         jRadioButtonExistingProgression.setText("Existing progression");
@@ -334,10 +369,43 @@ public class NewBet extends javax.swing.JPanel {
     
     private void loadDataFromDB()
     {
+        betNotInProg = DataContainer.dataFromDB.getQueryManager().getBetNotInProg(
+                DataContainer.id);
         
+        jTextFieldBetName.setText(betNotInProg.getBetName());
+        //String date = calendar.setDate();
+        // POMYSLEC CO Z DATA!!!!!
+        jTextFieldOdd.setText(Double.toString(betNotInProg.getOdd()));
+        jTextFieldStake.setText(Double.toString(betNotInProg.getStake()));
+        //String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
+        
+                // NIE DZIALA       !!!!
+        String bukmacher = betNotInProg.getBukmacher();
+        int index = selectBukmacher(bukmacher);
+        jComboBoxBukmacher.setSelectedIndex(index);
+        System.out.println(bukmacher);
+
+        String note = jTextAreaNote.getText();
+        jTextAreaNote.setText(betNotInProg.getNote());
+        
+
+        String type = betNotInProg.getType();
+        jComboBoxType.setSelectedItem(type.toLowerCase());        //sprawdzic OTHER - other
+        
+        //STATUS zakaldu
     }
-     
-    private void jButtonAddBetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddBetActionPerformed
+    
+    private int selectBukmacher(String bukmacher)
+    {
+        for(int i=0; i < jComboBoxBukmacher.getItemCount(); i++)
+        {
+            if(jComboBoxBukmacher.getSelectedItem().equals(bukmacher))
+                return i;
+        }
+       return -1;
+    }
+    
+    private void jButtonSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveChangesActionPerformed
 
         String betName = jTextFieldBetName.getText();
         String date = calendar.setDate();
@@ -346,10 +414,10 @@ public class NewBet extends javax.swing.JPanel {
         String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
         String note = jTextAreaNote.getText();
         String type = jComboBoxType.getSelectedItem().toString();
-        
+
         int betId = 0;
         int progressionId = 0;
- 
+
         if(jCheckBoxProgression.isSelected())
         {
             String progressionName = "";
@@ -357,18 +425,20 @@ public class NewBet extends javax.swing.JPanel {
             if(jRadioButtonExistingProgression.isSelected())
             {
                 progressionName = jComboBoxExistingProgression.getSelectedItem().toString();
-                DataContainer.dataFromDB.getQueryManager().addBetInProgressionExisting(betName, date, odd, stake, 
-                        bukmacher, note, type, progressionName);
+                // TUTAJ UPDATE zamiast add
                 
+                //DataContainer.dataFromDB.getQueryManager().addBetInProgressionExisting(betName, date, odd, stake,
+                //    bukmacher, note, type, progressionName);
+
                 //tworzy obiekt, ktory zostanie dodany do listy
                 //id - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
                 betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
                 progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
-                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake, 
-                        bukmacher, note, type, progressionId , progressionName, 1);
+                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake,
+                    bukmacher, note, type, progressionId , progressionName, 1);
                 Bet bet = (Bet) betInProg;
-                
-                //aktualizacja list              
+
+                //aktualizacja list
                 //aktywne zaklady w progresji
                 DataContainer.listModelActiveInProg.addElement(betInProg);
                 //wszystkie aktywne zaklady
@@ -378,20 +448,21 @@ public class NewBet extends javax.swing.JPanel {
             if(jRadioButtonNewProgression.isSelected())
             {
                 progressionName = jTextFieldProgressionName.getText();
-                DataContainer.dataFromDB.getQueryManager().addBetInProgressionNew(betName, date, odd, stake, 
-                        bukmacher, note, type, progressionName);
-                
+                // TUTAJ UPDATE zamiast add
+                //DataContainer.dataFromDB.getQueryManager().addBetInProgressionNew(betName, date, odd, stake,
+                //   bukmacher, note, type, progressionName);
+
                 //tworzy obiekt, ktory zostanie dodany do listy
                 //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
                 //progressionId - jak wyzej
                 betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
                 progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
-                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake, 
-                        bukmacher, note, type, progressionId , progressionName, 1);
+                BetInProgression betInProg = new BetInProgression(betId, betName, date, odd, stake,
+                    bukmacher, note, type, progressionId , progressionName, 1);
                 Bet bet = (Bet) betInProg;
-                
+
                 Progression prog = new Progression(progressionId, progressionName, 1);
-                
+
                 //wszystkie aktywne zaklady
                 DataContainer.listModelAllActive.addElement(bet);
                 //aktywne zaklady w progresji
@@ -402,26 +473,27 @@ public class NewBet extends javax.swing.JPanel {
         }
         else
         {
-            DataContainer.dataFromDB.getQueryManager().addBet(betName, date, odd, stake, bukmacher, note, type);
+           // DataContainer.dataFromDB.getQueryManager().addBet(betName, date, odd, stake, bukmacher, note, type);
+                // TUTAJ UPDATE zamiast add
             
             //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
             betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
-            
+
             Bet bet = new Bet(betId, betName, date, odd, stake, bukmacher, note, type);
-            
+
             //wszystkie aktywne zaklady
             DataContainer.listModelAllActive.addElement(bet);
             //aktywne zaklady nie w progresji
             DataContainer.listModelActiveNotInProg.addElement(bet);
         }
-    }//GEN-LAST:event_jButtonAddBetActionPerformed
+    }//GEN-LAST:event_jButtonSaveChangesActionPerformed
 
     private void jCheckBoxProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxProgressionActionPerformed
 
         if(jCheckBoxProgression.isSelected())
-            jPanelProgression.setVisible(true);
+        jPanelProgression.setVisible(true);
         else
-            jPanelProgression.setVisible(false);
+        jPanelProgression.setVisible(false);
     }//GEN-LAST:event_jCheckBoxProgressionActionPerformed
 
     private void jRadioButtonNewProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNewProgressionActionPerformed
@@ -452,10 +524,10 @@ public class NewBet extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jRadioButtonExistingProgressionActionPerformed
 
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupProgression;
-    private javax.swing.JButton jButtonAddBet;
+    private javax.swing.ButtonGroup buttonGroupStatus;
+    private javax.swing.JButton jButtonSaveChanges;
     private javax.swing.JCheckBox jCheckBoxProgression;
     private javax.swing.JComboBox jComboBoxBukmacher;
     private javax.swing.JComboBox jComboBoxDay;
@@ -475,10 +547,14 @@ public class NewBet extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelTime;
     private javax.swing.JLabel jLabelTitle;
     private javax.swing.JLabel jLabelType;
-    private javax.swing.JPanel jPanelNewBet;
+    private javax.swing.JPanel jPanelEditBet;
     private javax.swing.JPanel jPanelProgression;
+    private javax.swing.JRadioButton jRadioButtonCanceled;
     private javax.swing.JRadioButton jRadioButtonExistingProgression;
+    private javax.swing.JRadioButton jRadioButtonLost;
     private javax.swing.JRadioButton jRadioButtonNewProgression;
+    private javax.swing.JRadioButton jRadioButtonUnresolved;
+    private javax.swing.JRadioButton jRadioButtonWon;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextAreaNote;
     private javax.swing.JTextField jTextFieldBetName;

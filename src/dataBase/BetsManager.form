@@ -104,10 +104,8 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="jButtonDelete" pref="49" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jButtonEdit" pref="49" max="32767" attributes="0"/>
-                              <Component id="jButtonViewNote" max="32767" attributes="0"/>
-                          </Group>
+                          <Component id="jButtonEdit" pref="49" max="32767" attributes="0"/>
+                          <Component id="jButtonViewNote" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace pref="24" max="32767" attributes="0"/>
                       <Component id="jLabelInformation" min="-2" max="-2" attributes="0"/>
@@ -294,6 +292,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="jButton2"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonEditActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButtonDelete">
       <Properties>
