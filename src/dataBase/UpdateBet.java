@@ -232,9 +232,8 @@ public class UpdateBet extends javax.swing.JFrame {
                 DataContainer.listModelResolvedBetsInProg.addElement(betInProg);
                                
                 //dodanie do 1 z 3 list (wygrany, przegrane, anulowane) (5 z 5)
-                //aktualizacja bazy danych
-               
-                //tymczasowo wylaczony autocommit
+                //aktualizacja bazy danych     
+                
                 try
                 {
                     DataContainer.dataFromDB.getQueryManager().getConn().setAutoCommit(false);
@@ -256,7 +255,7 @@ public class UpdateBet extends javax.swing.JFrame {
                     DataContainer.listModelResolvedProgressions.addElement(betInProg.getProgression());
                 }
                 
-                //aktualizacja list zwiazanych z progresja      
+                //aktualizacja list zwiazanych z progresja    !!!!  
                 
                 if(status == 3)
                     DataContainer.listModelLostBetsInProg.addElement(betInProg);

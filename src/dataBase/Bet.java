@@ -86,16 +86,6 @@ public class Bet {
         return betId + " " + betName;
     }
     
-    public void setLostBet()
-    {
-        betStatus= 2;
-    }
-    
-    public void setWonBet()
-    {
-        betStatus = 1;
-    }
-
     public int getBetId() 
     {
         return betId;
@@ -131,19 +121,9 @@ public class Bet {
         return balance;
     }
 
-    public void setWon(double balance) 
-    {
-        this.balance = balance;
-    }
-
     public String getNote() 
     {
         return note;
-    }
-
-    public void setNote(String note) 
-    {
-        this.note = note;
     }
 
     public String getBukmacher() 
@@ -151,18 +131,13 @@ public class Bet {
         return bukmacher;
     }
 
-    public void setBukmacher(String bukmacher) 
-    {
-        this.bukmacher = bukmacher;
-    }
-    
     public String getType() 
     {
         return type;
     }
-
-    public void setType(String type) 
+     
+    public int getPartOfProgression() 
     {
-        this.type = type;
+        return partOfProgression;
     }
 }

@@ -593,6 +593,7 @@ public class BetsManager extends javax.swing.JPanel {
             //dla bet
             if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
             {
+                //zapamietanie danych zakladu
                 DataContainer.object = DataContainer.listModelActiveNotInProg.getElementAt(
                         jListBets.getSelectedIndex());
                 Bet selectedBet = (Bet) DataContainer.object;

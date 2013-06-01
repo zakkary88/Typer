@@ -79,4 +79,46 @@ public class Calendar {
                 ":" + jComboBoxMinute.getSelectedItem().toString();
     }
     
+    public String getDay(String date)
+    {
+        String day = "";
+        String [] split = date.split("-");
+        String [] split2 = split[2].split(" ");
+        day = split2[0];
+        return day;
+    }
+    
+    public String getMonth(String date)
+    {
+        String month = "";
+        String [] split = date.split("-");
+        month = split[1];
+        return month;
+    }
+    
+    public String getYear(String date)
+    {
+        String year = "";
+        String [] split = date.split("-");
+        year = split[0];
+        return year;
+    }
+    
+    public String getHour(String date)
+    {
+        String hour = "";
+        String [] split = date.split(" ");
+        String [] split2 = split[1].split(":");
+        hour = split2[0];
+        return hour;
+    }
+    
+    public String getMinute(String date)
+    {
+        String minute = "";
+        String [] split = date.split(" ");
+        String [] split2 = split[1].split(":");
+        minute = split2[1];
+        return minute;
+    }
 }

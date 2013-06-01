@@ -66,6 +66,8 @@ public class QueryManager {
     private PreparedStatement changeLostBetBalanceStmt = null;
     private PreparedStatement endProgressionStmt = null;
     
+    private PreparedStatement updateBetStmt = null;
+    
   
     //ZAPYTANIA
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
@@ -181,6 +183,14 @@ public class QueryManager {
     private static final String endProgressionQuery = "UPDATE Progressions SET "
             + "ProgressionStatus = 2 WHERE ProgressionId = ?";
     
+    //((1)betName, (2)date, (3)odd, (4)stake, (5)partOfProgression - progressionId,
+    // (6)betStatus, (7)bukmacher, (8)note, (9)balance, (10)type)
+    // (11)betId
+    private static final String updateBetQuery = "UPDATE Bets SET "
+            + "BetName = ?, Date = ?, Odd = ?, Stake = ?, PartOfProgression = ?, "
+            + "Status = ?, Bukmacher = ?, Note = ?, Balance = ?, Type = ? WHERE "
+            + "BetId = ?"; 
+    
        // odzielnie zapytanie do pobierania NOTE !!!!
     
        // laczenie w tabelach przez JOIN    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -279,6 +289,67 @@ public class QueryManager {
             int update = endProgressionStmt.executeUpdate();
             System.out.println(update + " updates. " + "Progression: " + progressionId + 
                     " ended");
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    public void updateBet(Bet bet)
+    {
+        try
+        {
+            if(updateBetStmt == null)
+                updateBetStmt = conn.prepareStatement(updateBetQuery);
+            
+                //((1)betName, (2)date, (3)odd, (4)stake, (5)partOfProgression - progressionId,
+                // (6)Status, (7)bukmacher, (8)note, (9)balance, (10)type)
+                // (11)betId
+            int id = bet.getBetId();
+            updateBetStmt.setInt(11, id);
+            
+            int status = bet.getBetStatus();
+            updateBetStmt.setInt(6, bet.getBetStatus());
+            
+            updateBetStmt.setString(1, bet.getBetName());
+            updateBetStmt.setString(2, bet.getDate());
+            updateBetStmt.setDouble(3, bet.getOdd());
+            updateBetStmt.setDouble(4, bet.getStake());
+            updateBetStmt.setInt(5, bet.getPartOfProgression());          
+            updateBetStmt.setString(7, bet.getBukmacher());
+            updateBetStmt.setString(8, bet.getNote());
+            updateBetStmt.setString(10, bet.getType());
+            
+            int update = updateBetStmt.executeUpdate();
+            System.out.println(update + " updates. " + "Bet: " + id);
+            
+            //update na podstawie statusu zakladu (wygrany/przegrany/ odwolany-nierozstrzygniety)
+            if(status == 1 || status == 4)
+                updateBetStmt.setDouble(9, 0.0);
+            
+            if(status == 2)  //wygrany
+            {
+                if(changeWonBetBalanceStmt == null)
+                    changeWonBetBalanceStmt = conn.prepareStatement(changeWonBetBalanceQuery);
+                
+                changeWonBetBalanceStmt.setInt(1, id);
+                
+                int up = changeWonBetBalanceStmt.executeUpdate();
+                System.out.println(up + " updates. " + "Bet: " + id + " won!");
+            }
+            
+            if(status == 3)  //przegrany
+            {
+                if(changeLostBetBalanceStmt == null)
+                    changeLostBetBalanceStmt = conn.prepareStatement(changeLostBetBalanceQuery);
+                
+                changeLostBetBalanceStmt.setInt(1, id);
+                
+                int up = changeLostBetBalanceStmt.executeUpdate();
+                System.out.println(up + " updates. " + "Bet: " + id + " lost!");
+            }       
         }
         catch(SQLException e)
         {

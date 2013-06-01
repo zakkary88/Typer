@@ -4,12 +4,15 @@
  */
 package dataBase;
 
+import java.sql.SQLException;
+
 /**
  *
  * @author Marcin
  */
 public class EditBet extends javax.swing.JPanel {
    
+    private int status = 0;
     private Calendar calendar = null;
     private Bet betNotInProg = null;
     
@@ -160,15 +163,35 @@ public class EditBet extends javax.swing.JPanel {
 
         buttonGroupStatus.add(jRadioButtonWon);
         jRadioButtonWon.setText("jRadioButton1");
+        jRadioButtonWon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonWonActionPerformed(evt);
+            }
+        });
 
         buttonGroupStatus.add(jRadioButtonLost);
         jRadioButtonLost.setText("jRadioButton2");
+        jRadioButtonLost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonLostActionPerformed(evt);
+            }
+        });
 
         buttonGroupStatus.add(jRadioButtonCanceled);
         jRadioButtonCanceled.setText("jRadioButton3");
+        jRadioButtonCanceled.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCanceledActionPerformed(evt);
+            }
+        });
 
         buttonGroupStatus.add(jRadioButtonUnresolved);
         jRadioButtonUnresolved.setText("jRadioButton4");
+        jRadioButtonUnresolved.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonUnresolvedActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelEditBetLayout = new javax.swing.GroupLayout(jPanelEditBet);
         jPanelEditBet.setLayout(jPanelEditBetLayout);
@@ -373,36 +396,89 @@ public class EditBet extends javax.swing.JPanel {
                 DataContainer.id);
         
         jTextFieldBetName.setText(betNotInProg.getBetName());
-        //String date = calendar.setDate();
-        // POMYSLEC CO Z DATA!!!!!
+
+        String date = betNotInProg.getDate();
+        selectData(date);
+        
         jTextFieldOdd.setText(Double.toString(betNotInProg.getOdd()));
         jTextFieldStake.setText(Double.toString(betNotInProg.getStake()));
-        //String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
         
-                // NIE DZIALA       !!!!
         String bukmacher = betNotInProg.getBukmacher();
         int index = selectBukmacher(bukmacher);
         jComboBoxBukmacher.setSelectedIndex(index);
-        System.out.println(bukmacher);
 
         String note = jTextAreaNote.getText();
         jTextAreaNote.setText(betNotInProg.getNote());
         
-
         String type = betNotInProg.getType();
         jComboBoxType.setSelectedItem(type.toLowerCase());        //sprawdzic OTHER - other
         
-        //STATUS zakaldu
+        status = betNotInProg.getBetStatus();
+        selectStatus(status);
     }
     
-    private int selectBukmacher(String bukmacher)
+    private void selectData(String date)
+    {
+        String year = calendar.getYear(date);
+        String month = calendar.getMonth(date);
+        String day = calendar.getDay(date);
+        String hour = calendar.getHour(date);
+        String minute = calendar.getMinute(date);
+        
+        for(int i=0; i < jComboBoxYear.getItemCount(); i++)
+        {
+            if(jComboBoxYear.getItemAt(i).toString().equals(year))
+                jComboBoxYear.setSelectedIndex(i);
+        }
+        
+        for(int i=0; i < jComboBoxMonth.getItemCount(); i++)
+        {
+            if(jComboBoxMonth.getItemAt(i).toString().equals(month))
+                jComboBoxMonth.setSelectedIndex(i);
+        }
+        
+        for(int i=0; i < jComboBoxDay.getItemCount(); i++)
+        {
+            if(jComboBoxDay.getItemAt(i).toString().equals(day))
+                jComboBoxDay.setSelectedIndex(i);
+        }
+        
+        for(int i=0; i < jComboBoxHour.getItemCount(); i++)
+        {
+            if(jComboBoxHour.getItemAt(i).toString().equals(hour))
+                jComboBoxHour.setSelectedIndex(i);
+        }
+        
+        for(int i=0; i <jComboBoxMinute.getItemCount(); i++)
+        {
+            if(jComboBoxMinute.getItemAt(i).toString().equals(minute))
+                jComboBoxMinute.setSelectedIndex(i);
+        }             
+    }
+    
+    private void selectStatus(int status)
+    {
+        if(status == 1)
+            jRadioButtonUnresolved.setSelected(true);
+        
+        if(status == 2)
+            jRadioButtonWon.setSelected(true);
+        
+        if(status == 3)
+            jRadioButtonLost.setSelected(true);
+        
+        if(status == 4)
+            jRadioButtonCanceled.setSelected(true);
+    }
+    
+   private int selectBukmacher(String bukmacher)
     {
         for(int i=0; i < jComboBoxBukmacher.getItemCount(); i++)
         {
-            if(jComboBoxBukmacher.getSelectedItem().equals(bukmacher))
+            if(jComboBoxBukmacher.getItemAt(i).toString().equals(bukmacher))
                 return i;
         }
-       return -1;
+        return -1;
     }
     
     private void jButtonSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveChangesActionPerformed
@@ -415,6 +491,7 @@ public class EditBet extends javax.swing.JPanel {
         String note = jTextAreaNote.getText();
         String type = jComboBoxType.getSelectedItem().toString();
 
+        // WYKASOWAC - dostep do id przez DataContainer
         int betId = 0;
         int progressionId = 0;
 
@@ -472,19 +549,46 @@ public class EditBet extends javax.swing.JPanel {
             }
         }
         else
-        {
-           // DataContainer.dataFromDB.getQueryManager().addBet(betName, date, odd, stake, bukmacher, note, type);
-                // TUTAJ UPDATE zamiast add
+        {  
             
-            //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
-            betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
-
-            Bet bet = new Bet(betId, betName, date, odd, stake, bukmacher, note, type);
-
+//            try
+//                {
+//                    DataContainer.dataFromDB.getQueryManager().getConn().setAutoCommit(false);
+//                }
+//                catch(SQLException e)
+//                {
+//                    System.out.println("autocommit error");
+//                }
+            
+            // ZALEZY OD STATUSU !!!!! 
+            // tworzy balance nie jest zalezny od obiektu, tylko od zapytania
+            //public Bet(int betId, String betName, String date, double odd, double stake, int partOfProgression,
+            //int betStatus, String bukmacher, String note, double balance, String type)
+            Bet bet = new Bet(DataContainer.id, betName, date, odd, stake, 0, status,
+                    bukmacher, note, 0.0, type);
+            DataContainer.dataFromDB.getQueryManager().updateBet(bet);
+            //w bazie znajduje sie prawidlowy obiekt, mozna nadpisac bet
+            // UWAGA - tutaj betNOTinProg   !!!!    comit wylaczony - nie mozna pobrac
+            bet = DataContainer.dataFromDB.getQueryManager().getBetNotInProg(DataContainer.id);
+                
+            System.out.println(bet.getBetName());
+            System.out.println(bet.getDate());
+            System.out.println(bet.getOdd());
+            System.out.println(bet.getStake());
+            System.out.println(bet.getPartOfProgression());
+            System.out.println(bet.getNote());
+            System.out.println(bet.getBukmacher());
+            System.out.println(bet.getType());
+            System.out.println(bet.getBalance());
+            System.out.println(bet.getBetStatus());
+            
+            
+            // AKTUALIZACJA LIST ZALEZNA OD STATUSU i typu zakladu!!!!!
+            
             //wszystkie aktywne zaklady
-            DataContainer.listModelAllActive.addElement(bet);
-            //aktywne zaklady nie w progresji
-            DataContainer.listModelActiveNotInProg.addElement(bet);
+//            DataContainer.listModelAllActive.addElement(bet);
+//            //aktywne zaklady nie w progresji
+//            DataContainer.listModelActiveNotInProg.addElement(bet);
         }
     }//GEN-LAST:event_jButtonSaveChangesActionPerformed
 
@@ -523,6 +627,26 @@ public class EditBet extends javax.swing.JPanel {
             jComboBoxExistingProgression.setEnabled(false);
         }
     }//GEN-LAST:event_jRadioButtonExistingProgressionActionPerformed
+
+    private void jRadioButtonWonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonWonActionPerformed
+        
+        status = 2;
+    }//GEN-LAST:event_jRadioButtonWonActionPerformed
+
+    private void jRadioButtonLostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonLostActionPerformed
+        
+        status = 3;
+    }//GEN-LAST:event_jRadioButtonLostActionPerformed
+
+    private void jRadioButtonCanceledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCanceledActionPerformed
+        
+        status = 4;
+    }//GEN-LAST:event_jRadioButtonCanceledActionPerformed
+
+    private void jRadioButtonUnresolvedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonUnresolvedActionPerformed
+        
+        status = 1;
+    }//GEN-LAST:event_jRadioButtonUnresolvedActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupProgression;
