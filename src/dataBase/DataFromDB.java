@@ -45,7 +45,7 @@ public class DataFromDB {
         fillLists();
     }
     
-    private void fillLists()
+    public void fillLists()
     {
         queryManager.viewActiveBetsOnList(bets);
         queryManager.viewActiveBetsNotInProgression(betsNotInProg);
@@ -67,6 +67,30 @@ public class DataFromDB {
         queryManager.viewWonBetsInProgression(wonBetsInProg);
         queryManager.viewLostBetsInProgression(lostBetsInProg);
         queryManager.viewCanceledBetsInProgression(canceledBetsInProg);
+    }
+    
+    public void clearAllLists()
+    {
+        bets.clear();
+        betsNotInProg.clear();
+        progressions.clear();
+        betsInProg.clear();
+        
+        todayBets.clear();
+        endedBetsToUpdate.clear();
+        endedBetsInProgToUpdate.clear();
+        
+        resolvedBetsInProg.clear();
+        resolvedBetsNotInProg.clear();
+        resolvedProgressions.clear();
+        
+        wonBetsInProg.clear();
+        lostBetsInProg.clear();
+        canceledBetsInProg.clear();
+        
+        wonBetsNotInProg.clear();
+        lostBetsNotInProg.clear();
+        canceledBetsNotInProg.clear();
     }
     
     //zrzutuje wszystkie zaklady w gore do Bet (niewazne, na tej liscie nie wyswietla sie info)
@@ -96,6 +120,32 @@ public class DataFromDB {
         return result;
     }
     
+    public int getWonBetNotInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(Bet wbnip : wonBetsNotInProg)
+        {
+            if(wbnip.getBetId() == id)
+                result = index;
+            index++;
+        }
+        return result;
+    }
+    
+    public int getLostBetNotInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(Bet lbnip : lostBetsNotInProg)
+        {
+            if(lbnip.getBetId() == id)
+                result = index;
+            index++;
+        }
+        return result;
+    }
+    
     public int getActiveBetInProgIndexById(int id)
     {
         int index = 0;
@@ -109,6 +159,32 @@ public class DataFromDB {
         return result;
     }
     
+    public int getLostBetInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(BetInProgression lbip : lostBetsInProg)
+        {
+            if(lbip.getBetId() == id)
+                result = index;
+            index++;
+        }
+        return result;
+    }
+    
+    public int getWonBetInProgIndexById(int id)
+    {
+        int index = 0;
+        int result = 0;
+        for(BetInProgression wbip : wonBetsInProg)
+        {
+            if(wbip.getBetId() == id)
+                result = index;
+            index++;
+        }
+        return result;
+    }
+     
     public int getEndedBetToUpdateIndexById(int id)
     {
         int index = 0;

@@ -311,7 +311,7 @@ public class QueryManager {
             updateBetStmt.setInt(11, id);
             
             int status = bet.getBetStatus();
-            updateBetStmt.setInt(6, bet.getBetStatus());
+            updateBetStmt.setInt(6, status);
             
             updateBetStmt.setString(1, bet.getBetName());
             updateBetStmt.setString(2, bet.getDate());

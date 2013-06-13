@@ -17,6 +17,7 @@ public class DataContainer {
     
     public static int id = 0;
     public static Object object = null;
+    public static String listName = "";
     
 //    public static JList jListEndedBetsToUpdate = new JList();
 //    public static JList jListEndedBetsInProgToUpdate = new JList();
@@ -41,6 +42,29 @@ public class DataContainer {
     public static DefaultListModel listModelWonBetsInProg = new DefaultListModel();
     public static DefaultListModel listModelLostBetsInProg = new DefaultListModel();
     public static DefaultListModel listModelCanceledBetsInProg = new DefaultListModel();
+    
+    public static void clearAllListsModels()
+    {
+        listModelAllActive.clear();
+        listModelActiveNotInProg.clear();
+        listModelActiveInProg.clear();
+        listModelProgressions.clear();
+        
+        listModelTodayBets.clear();
+        listModelEndedBetsToUpdate.clear();
+        listModelEndedBetsInProgToUpdate.clear();
+        
+        listModelResolvedBetsInProg.clear();
+        listModelResolvedBetsNotInProg.clear();
+        listModelResolvedProgressions.clear();
+        
+        listModelWonBetsInProg.clear();
+        listModelWonBetsNotInProg.clear();
+        listModelLostBetsInProg.clear();
+        listModelLostBetsNotInProg.clear();
+        listModelCanceledBetsInProg.clear();
+        listModelCanceledBetsNotInProg.clear();
+    }
     
     public static void fillAllActiveBetsList()
     {

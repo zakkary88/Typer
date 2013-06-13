@@ -11,6 +11,7 @@
 package dataBase;
 
 import javax.swing.JFrame;
+import javax.swing.ListModel;
 
 /**
  *
@@ -19,6 +20,11 @@ import javax.swing.JFrame;
 public class BetsManager extends javax.swing.JPanel {
 
     private DataFromDB dataFromDB = null; 
+    
+    //UWAGA bledy moga wynikac z pojawienia sie betId
+    private int betId = 0;
+    private Bet selectedBet = null;
+    private BetInProgression selectedBetInProg = null;
       
     public BetsManager() 
     {
@@ -26,10 +32,7 @@ public class BetsManager extends javax.swing.JPanel {
         this.setSize(400, 400);
         
         dataFromDB = new DataFromDB();
-        
-        //zmiany
         DataContainer.dataFromDB = dataFromDB;
-        //
         
         setFields();
         fillLists();          
@@ -56,7 +59,7 @@ public class BetsManager extends javax.swing.JPanel {
         jListTodayBets.setEnabled(false);
     }
        
-    private void fillLists()
+    public static void fillLists()
     {
         DataContainer.fillActiveBetsInProgression();
         DataContainer.fillActiveBetsNotInProgression();
@@ -66,9 +69,9 @@ public class BetsManager extends javax.swing.JPanel {
         DataContainer.fillTodayBets();
         DataContainer.fillEndedBetsToUpdate();
         DataContainer.fillEndedBetsInProgToUpdate();
-        fillTodayBets();
-        fillEndedBetsToUpdate();
-        fillEndedBetsInProgToUpdate();
+   //     fillTodayBets();
+    //    fillEndedBetsToUpdate();
+   //     fillEndedBetsInProgToUpdate();
         
         DataContainer.fillResolvedBetsNotInProg();
         DataContainer.fillResolvedBetsInProg();
@@ -105,7 +108,7 @@ public class BetsManager extends javax.swing.JPanel {
         jComboBoxBetStatus.addItem("Resolved progressions");
     }
     
-    //to tez mozna do container przeniesc, ale setModel idzie do konstuktora u gory
+    //TODO to tez mozna do container przeniesc, ale setModel idzie do konstuktora u gory
     private void fillTodayBets()
     {
         jListTodayBets.setModel(DataContainer.listModelTodayBets);
@@ -530,9 +533,9 @@ public class BetsManager extends javax.swing.JPanel {
             {
                 DataContainer.object = DataContainer.listModelEndedBetsToUpdate.getElementAt
                         (jListEndedBetsToUpdate.getSelectedIndex());
-                Bet selectedBet = (Bet) DataContainer.object;
-                int id = selectedBet.getBetId();
-                DataContainer.id = id;
+                selectedBet = (Bet) DataContainer.object;
+                betId = selectedBet.getBetId();
+                DataContainer.id = betId;
                 betInfo = DataContainer.dataFromDB.getBetNotInProgInfo(selectedBet);
             }
             
@@ -540,10 +543,10 @@ public class BetsManager extends javax.swing.JPanel {
             {
                 DataContainer.object = DataContainer.listModelEndedBetsInProgToUpdate.getElementAt
                         (jListEndedBetsInProgToUpdate.getSelectedIndex());
-                BetInProgression selectedBet = (BetInProgression) DataContainer.object;
-                int id = selectedBet.getBetId();
-                DataContainer.id = id;
-                betInfo = DataContainer.dataFromDB.getBetInProgressionInfo(selectedBet);
+                selectedBetInProg = (BetInProgression) DataContainer.object;
+                betId = selectedBet.getBetId();
+                DataContainer.id = betId;
+                betInfo = DataContainer.dataFromDB.getBetInProgressionInfo(selectedBetInProg);
             }         
             
             //otwiera okno - wszystkie zmiany zachodza w UpdateBet po kliknieciu Confirm
@@ -578,6 +581,43 @@ public class BetsManager extends javax.swing.JPanel {
         addBetFrame.add(newBet);
     }//GEN-LAST:event_jButtonAddNewBetActionPerformed
 
+    private void saveBetData(ListModel listModel, String listName)
+    {
+                //zapamietanie danych zakladu
+                DataContainer.object = listModel.getElementAt(
+                        jListBets.getSelectedIndex());
+                selectedBet = (Bet) DataContainer.object;
+                betId = selectedBet.getBetId();
+                DataContainer.id = betId;
+                //zapamietanie listy zakladu
+                DataContainer.listName = listName;
+    }
+    
+    private void saveBetInProgData(ListModel listModel, String listName)
+    {
+                //zapamietanie danych zakladu
+                DataContainer.object = listModel.getElementAt(
+                        jListBets.getSelectedIndex());
+                selectedBetInProg = (BetInProgression) DataContainer.object;
+                betId = selectedBet.getBetId();
+                DataContainer.id = betId;
+                //zapamietanie listy zakladu
+                DataContainer.listName = listName;
+    }
+    
+    private void runEditWindow()
+    {
+            //uruchomienie okna edycji zakladu
+            JFrame editBetFrame = new JFrame();
+            editBetFrame.setVisible(true);
+            editBetFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            editBetFrame.setSize(445, 445);
+            editBetFrame.setTitle("Edit");
+
+            EditBet editBet = new EditBet();
+            editBetFrame.add(editBet);
+    }
+    
     private void jButtonEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEditActionPerformed
         
         if(jListBets.getSelectedValue() == null)
@@ -588,26 +628,32 @@ public class BetsManager extends javax.swing.JPanel {
         {
             jLabelInformation.setText("");
             
-            //IF (zalezy jaka lista zostala wybrana
-            
-            //dla bet
             if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
             {
-                //zapamietanie danych zakladu
-                DataContainer.object = DataContainer.listModelActiveNotInProg.getElementAt(
-                        jListBets.getSelectedIndex());
-                Bet selectedBet = (Bet) DataContainer.object;
-                int id = selectedBet.getBetId();
-                DataContainer.id = id;
-
-                JFrame editBetFrame = new JFrame();
-                editBetFrame.setVisible(true);
-                editBetFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                editBetFrame.setSize(445, 445);
-                editBetFrame.setTitle("Edit");
-
-                EditBet editBet = new EditBet();
-                editBetFrame.add(editBet);
+                  saveBetData(DataContainer.listModelActiveNotInProg, 
+                        "Active bets not in progressions");
+                  runEditWindow();
+            }
+            
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets not in progressions"))
+            {
+                  saveBetData(DataContainer.listModelLostBetsNotInProg, 
+                        "Lost bets not in progressions");
+                  runEditWindow();
+            }
+            
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets not in progressions"))
+            {
+                  saveBetData(DataContainer.listModelWonBetsNotInProg, 
+                          "Won bets not in progressions");
+                  runEditWindow();
+            }
+            
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
+            {
+                  saveBetInProgData(DataContainer.listModelActiveNotInProg, 
+                          "Active bets in progressions");
+                  runEditWindow();
             }
 
         }
