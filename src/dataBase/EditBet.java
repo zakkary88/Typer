@@ -22,8 +22,21 @@ public class EditBet extends javax.swing.JPanel {
         initComponents();
         calendar = new Calendar(jComboBoxDay, jComboBoxMonth, jComboBoxYear, jComboBoxHour, jComboBoxMinute);
         setFields();
-        loadDataFromDB();
-    }
+        
+        //load zalezy od wybranej listy 
+       if(DataContainer.listName.equals("Active bets in progressions")
+               || DataContainer.listName.equals("Won bets in progressions")
+               || DataContainer.listName.equals("Lost bets in progressions"))
+            loadDataFromDBforBetInProg();
+       
+       // NIE DZIALA JESZCZE - mozliwe, ze wina zapytania lub niepelnych danych zakładu
+        
+        if(DataContainer.listName.equals("Active bets not in progressions")
+                || DataContainer.listName.equals("Won bets not in progressions")
+                || DataContainer.listName.equals("Lost bets not in progressions"))
+            loadDataFromDBforBet();
+        //NIE ZMIENIA SIE ID !!!!
+    } 
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -366,7 +379,8 @@ public class EditBet extends javax.swing.JPanel {
         jTextFieldProgressionName.setEnabled(false);
         jComboBoxExistingProgression.setEnabled(true);
         
-        DataContainer.dataFromDB.getQueryManager().fillComboBoxExisitingProgression(jComboBoxExistingProgression);
+
+        jComboBoxExistingProgression.setModel(DataContainer.comboBoxmodelProgressions);  
         fillComboBoxBukmacher();
         fillComboBoxType();
         calendar.fillComboBoxDateTime();
@@ -391,7 +405,7 @@ public class EditBet extends javax.swing.JPanel {
             jComboBoxBukmacher.addItem(b);
     }
     
-    private void loadDataFromDB()
+    private void loadDataFromDBforBet()
     {
         betNotInProg = DataContainer.dataFromDB.getQueryManager().getBetNotInProg(
                 DataContainer.id);
@@ -408,14 +422,47 @@ public class EditBet extends javax.swing.JPanel {
         int index = selectBukmacher(bukmacher);
         jComboBoxBukmacher.setSelectedIndex(index);
 
-        String note = jTextAreaNote.getText();
         jTextAreaNote.setText(betNotInProg.getNote());
         
         String type = betNotInProg.getType();
         jComboBoxType.setSelectedItem(type.toLowerCase());        //TODO sprawdzic OTHER - other
         
         status = betNotInProg.getBetStatus();
+        selectStatus(status);       
+    }
+    
+    private void loadDataFromDBforBetInProg()
+    {
+        betInProg = DataContainer.dataFromDB.getQueryManager().getBetInProgression(DataContainer.id);
+        
+        jTextFieldBetName.setText(betInProg.getBetName());
+
+        String date = betInProg.getDate();
+        selectData(date);
+        
+        jTextFieldOdd.setText(Double.toString(betInProg.getOdd()));
+        jTextFieldStake.setText(Double.toString(betInProg.getStake()));
+        
+        String bukmacher = betInProg.getBukmacher();
+        int index = selectBukmacher(bukmacher);
+        jComboBoxBukmacher.setSelectedIndex(index);
+
+        jTextAreaNote.setText(betInProg.getNote());
+        
+        String type = betInProg.getType();
+        jComboBoxType.setSelectedItem(type.toLowerCase());        //TODO sprawdzic OTHER - other
+        
+        status = betInProg.getBetStatus();
         selectStatus(status);
+        
+        //ustawienie kontrolek progresji
+//        jCheckBoxProgression.setSelected(true);
+//        jPanelProgression.setVisible(true);
+//        jRadioButtonExistingProgression.setSelected(true);      
+//        int progressionId = betInProg.getPartOfProgression();  //to samo, co ponizej
+//        //progressionId = betInProg.getProgression().getProgressionId();
+//        int progIndex = DataContainer.dataFromDB.getProgressionsIndexById(progressionId);
+//        jComboBoxExistingProgression.setSelectedIndex(progIndex);
     }
     
     private void selectData(String date)
@@ -481,6 +528,27 @@ public class EditBet extends javax.swing.JPanel {
         }
         return -1;
     }
+   
+   private void updateLists()
+   {
+            DataContainer.clearAllListsModels();
+            DataContainer.dataFromDB.clearAllLists();
+            DataContainer.dataFromDB.fillLists();
+            BetsManager.fillLists();   
+   }
+   
+   private int setProgressionStatus(int status)
+   {
+       int result = 0;
+       
+       if(status == 1 || status == 3)
+           result = 1;
+       
+       if(status == 2)
+           result = 2;
+       
+       return result;
+   }
     
     private void jButtonSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveChangesActionPerformed
 
@@ -490,66 +558,13 @@ public class EditBet extends javax.swing.JPanel {
         double stake = Double.parseDouble(jTextFieldStake.getText());
         String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
         String note = jTextAreaNote.getText();
-        String type = jComboBoxType.getSelectedItem().toString();
-
-        if(jCheckBoxProgression.isSelected())
-        {
-            String progressionName = "";
-
-            if(jRadioButtonExistingProgression.isSelected())
-            {
-                progressionName = jComboBoxExistingProgression.getSelectedItem().toString();
-                // TUTAJ UPDATE zamiast add
-                
-                //DataContainer.dataFromDB.getQueryManager().addBetInProgressionExisting(betName, date, odd, stake,
-                //    bukmacher, note, type, progressionName);
-
-                //tworzy obiekt, ktory zostanie dodany do listy
-                //id - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
-                int betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
-                int progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
-                betInProg = new BetInProgression(betId, betName, date, odd, stake,
-                    bukmacher, note, type, progressionId , progressionName, 1);
-                Bet bet = (Bet) betInProg;
-
-                // NIEKONIECZNIE JEST DOBRZE!!!
-                //aktualizacja list
-                //aktywne zaklady w progresji
-                DataContainer.listModelActiveInProg.addElement(betInProg);
-                //wszystkie aktywne zaklady
-                DataContainer.listModelAllActive.addElement(bet);
-            }
-
-            if(jRadioButtonNewProgression.isSelected())
-            {
-                progressionName = jTextFieldProgressionName.getText();
-                // TUTAJ UPDATE zamiast add
-                //DataContainer.dataFromDB.getQueryManager().addBetInProgressionNew(betName, date, odd, stake,
-                //   bukmacher, note, type, progressionName);
-
-                //tworzy obiekt, ktory zostanie dodany do listy
-                //betId - zaklad zostal dodany, trzeba zliczyc wszystkie zaklady
-                //progressionId - jak wyzej
-                int betId = DataContainer.dataFromDB.getQueryManager().countAllBets();
-                int progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions();
-                betInProg = new BetInProgression(betId, betName, date, odd, stake,
-                    bukmacher, note, type, progressionId , progressionName, 1);
-                Bet bet = (Bet) betInProg;
-
-                Progression prog = new Progression(progressionId, progressionName, 1);
-
-                // NIEKONIECZNIE JEST DOBRZE!!! bo to dla dodawania
-                //wszystkie aktywne zaklady
-                DataContainer.listModelAllActive.addElement(bet);
-                //aktywne zaklady w progresji
-                DataContainer.listModelActiveInProg.addElement(betInProg);
-                //aktywne progresje
-                DataContainer.listModelProgressions.addElement(prog);
-            }
-        }
-        else
-        {           
-            try
+        String type = jComboBoxType.getSelectedItem().toString();        
+        
+        //TODO po skonczeniu opracownia update - updateLists() wyrzucic na koniec funkcji
+        
+        
+        //wylacznie autocommita
+                try
                 {
                     DataContainer.dataFromDB.getQueryManager().getConn().setAutoCommit(false);
                 }
@@ -558,229 +573,75 @@ public class EditBet extends javax.swing.JPanel {
                     System.out.println("autocommit error");
                 }
             
-            // ZALEZY OD STATUSU !!!!! 
-            //tworzy nowy obiekt Bet, w którym balance nie jest zalezny od obiektu, tylko od zapytania
+
+        if(jCheckBoxProgression.isSelected())
+        {
+            String progressionName = "";
+            int progressionId = 0;
+
+            if(jRadioButtonExistingProgression.isSelected())
+            {             
+                progressionName = jComboBoxExistingProgression.getSelectedItem().toString();
+                progressionId = DataContainer.dataFromDB.
+                        getProgressionsIndexById(jComboBoxExistingProgression.getSelectedIndex());
+                
+                //status progresji zalezy od statusu zakladu
+                //status zakladu - 1 lub 3 -> status progresji = 1 (progresja trwa)
+                //status zakladu - 1 lub 3 -> status progresji = 2 (progresja zakonczona)
+                int progressionsStatus = setProgressionStatus(status);               
+
+                //public BetInProgression(int betId, String betName, String date, double odd, 
+                //double stake, int betStatus, String bukmacher, String note, double balance, 
+                //String type, int progressionId, String progressionName, int progressionStatus)
+                BetInProgression bip = new BetInProgression(DataContainer.id, betName, date, 
+                        odd, stake, status, bukmacher, note, 0.0 , type, 
+                        progressionId , progressionName, progressionsStatus);
+                
+                DataContainer.dataFromDB.getQueryManager().updateBet(bip);
+            }
+
+            if(jRadioButtonNewProgression.isSelected())
+            {
+                progressionName = jTextFieldProgressionName.getText();
+                
+                //dodaje progresje, zeby mozna bylo pobrac nowe id progresji dla zakladu
+                DataContainer.dataFromDB.getQueryManager().addProgression(progressionName);
+                progressionId = DataContainer.dataFromDB.getQueryManager().countAllProgressions(); 
+                
+                //public BetInProgression(int betId, String betName, String date, double odd, 
+                //double stake, int betStatus, String bukmacher, String note, double balance, 
+                //String type, int progressionId, String progressionName, int progressionStatus)
+                BetInProgression bip = new BetInProgression(DataContainer.id, betName, date, 
+                        odd, stake, status, bukmacher, note, 0.0 , type, 
+                        progressionId , progressionName, 1);
+
+                DataContainer.dataFromDB.getQueryManager().updateBet(bip);
+                //DataContainer.dataFromDB.getQueryManager().addProgression(progressionName);
+            }
+        }
+        else
+        {           
+            //tworzy nowy obiekt Bet, w którym balance nie jest zalezny od obiektu, tylko od statusu
+            //id zakladu zostaje to samo, zmieniają sie tylko dane zakładu w bazie
+            
             //public Bet(int betId, String betName, String date, double odd, double stake, int partOfProgression,
             //int betStatus, String bukmacher, String note, double balance, String type)
             Bet bet = new Bet(DataContainer.id, betName, date, odd, stake, 0, status,
                     bukmacher, note, 0.0, type);
+         
             DataContainer.dataFromDB.getQueryManager().updateBet(bet);
-            //w bazie znajduje sie prawidlowy obiekt, mozna nadpisac bet
-            // UWAGA - tutaj betNOTinProg   !!!!
-            bet = DataContainer.dataFromDB.getQueryManager().getBetNotInProg(DataContainer.id);
-                
-            System.out.println(bet.getBetName());
-            System.out.println(bet.getDate());
-            System.out.println(bet.getOdd());
-            System.out.println(bet.getStake());
-            System.out.println(bet.getPartOfProgression());
-            System.out.println(bet.getNote());
-            System.out.println(bet.getBukmacher());
-            System.out.println(bet.getType());
-            System.out.println(bet.getBalance());
-            System.out.println(bet.getBetStatus());
-            
-
-            DataContainer.clearAllListsModels();
-            DataContainer.dataFromDB.clearAllLists();
-            DataContainer.dataFromDB.fillLists();
-            BetsManager.fillLists();     
         }
+        
+        //aktyalizacja wszystkich list
+        updateLists();
     }//GEN-LAST:event_jButtonSaveChangesActionPerformed
-/*
-    private int getListIndex(String listName)
-    {
-        int index = 0;
-        
-        if(listName.equals("Active bets not in progressions"))
-           index = 1;
-        
-        if(listName.equals("Lost bets not in progressions"))
-           index = 2;
-        
-        if(listName.equals("Won bets not in progressions"))
-           index = 3;
-        
-        if(listName.equals("Active bets in progressions"))
-           index = 4;
-        
-        if(listName.equals("Lost bets in progressions"))
-           index = 5;
-        
-        if(listName.equals("Won bets in progressions"))
-           index = 6;
-             
-        return index;
-    }
-    
-    //funkcja tworzona z uwzglednieniem 3 mozliwych statusow zakladu
-    //oraz list w wyjeciem canceled i resolved
-    private void updateLists(String listName, int status)
-    {
-        int index = 0;
-        int listIndex = getListIndex(listName);
-        
-        
-                            //MOZE BYC PROBLEM PRZY 2 zmianie,
-                    //tzn. zmieniono na win, a z win na lost
-                    //czysci sie lista!!s
-        //PROBLEM ID !!! mozeliwe ze 2 zaklady maja to samo
- 
-        //1 nierozstrzygniety / 2 wygrany / 3 przegrany 
-        switch(listIndex)
-        {
-                //"Active bets not in progressions" (status 1)
-                case 1:                   
-                    // usuniecie z aktywnych  (1 z 3)
-                    DataContainer.listModelAllActive.clear();
-                    index = DataContainer.dataFromDB.getActiveBetIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getBets().remove(index);
-                    DataContainer.fillAllActiveBetsList();
-                    
-                    // usuniecie z aktywnych nie w progresji (2 z 3)
-                    DataContainer.listModelActiveNotInProg.clear();
-                    index = DataContainer.dataFromDB.getActiveBetNotInProgIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getBetsNotInProg().remove(index);
-                    DataContainer.fillActiveBetsNotInProgression();
-                    
-                    Bet bet = (Bet) DataContainer.object;
-                    
-                    // zaleznie od statusu (3 z 3)
-                    switch(status)
-                    {
-                        //case 1 - bez zmian w listach
-        
-                        case 2:
-                            //dodanie do wygranych                           
-                            DataContainer.listModelWonBetsNotInProg.addElement(bet);
-                            break;
-                            
-                        case 3:
-                            //dodanie do przegranych                           
-                            DataContainer.listModelLostBetsNotInProg.addElement(bet);
-                            break;
-                   
-                        default:
-                            break;
-                    }
-                    break;
-                    
-                //"Lost bets not in progressions"  (status 3)  
-                case 2:
-                    // usuniecie z przegranych (1 z 3)  //  (1 z 2)
-                    DataContainer.listModelLostBetsNotInProg.clear();
-                    index = DataContainer.dataFromDB.getLostBetNotInProgIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getLostBetsNotInProg().remove(index);
-                    DataContainer.fillLostBetsNotInProg();                   
-                    
-                    bet = (Bet) DataContainer.object;
-                    switch(status)
-                    {
-                        // case 3 - bez zmian
-                        
-                        case 1:
-                            //dodanie do aktywnych (2 z 3)                           
-                            DataContainer.listModelAllActive.addElement(bet);
-                            //dodanie do aktywnych nie w progresji (3 z 3)                     
-                            DataContainer.listModelActiveNotInProg.addElement(bet);
-                            break;
-                            
-                        case 2:                                                                              
-                            //dodanie wygranych (2 z 2)                           
-                            DataContainer.listModelWonBetsNotInProg.addElement(bet); 
-                            break;
-                            
-                        default:
-                            break;                 
-                    }
-                    break;
-                
-                //"Won bets not in progressions" (status 2)
-                case 3:
-                    // usuniecie z wygranych (1 z 3)  //  (1 z 2)
-                    DataContainer.listModelWonBetsNotInProg.clear();
-                    index = DataContainer.dataFromDB.getWonBetNotInProgIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getWonBetsNotInProg().remove(index);
-                    DataContainer.fillWonBetsNotInProg();
-                    
-                    bet = (Bet) DataContainer.object;
-                    switch(status)
-                    {
-                        case 1:
-                            //dodanie do aktywnych (2 z 3)                           
-                            DataContainer.listModelAllActive.addElement(bet);
-                            //dodanie do aktywnych nie w progresji (3 z 3)                     
-                            DataContainer.listModelActiveNotInProg.addElement(bet);
-                            break;
-                            
-                        //case 2 - bez zmian
-                            
-                        case 3:
-                            //dodanie do przegranych (2 z 2)
-                            DataContainer.listModelLostBetsNotInProg.addElement(bet);
-                            break;
-                        
-                        default:
-                            break;
-                    }
-                    break;
-                    
-                //"Active bets in progressions" (status 1)    
-                case 4:
-                    // usuniecie z aktywnych  (1 z 3)
-                    DataContainer.listModelAllActive.clear();
-                    index = DataContainer.dataFromDB.getActiveBetIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getBets().remove(index);
-                    DataContainer.fillAllActiveBetsList();
-                    
-                    // usuniecie z aktywnych w progresji (2 z 3)
-                    DataContainer.listModelActiveInProg.clear();// pobieranie
-                    index = DataContainer.dataFromDB.getActiveBetInProgIndexById(DataContainer.id);
-                    DataContainer.dataFromDB.getBetsInProg().remove(index);
-                    DataContainer.fillActiveBetsInProgression();
-                    
-                    betInProg = (BetInProgression) DataContainer.object;
-                    switch(status)
-                    {
-                        //case 1 - bez zmian
-                        
-                        case 2:
-                            //dodanie do wygranych (3 z 3)
-                            DataContainer.listModelWonBetsInProg.addElement(betInProg);
-                            break;
-                            
-                        case 3:
-                            //dodanie do przegranych (3 z 3)
-                            DataContainer.listModelLostBetsInProg.addElement(betInProg);
-                            break;
-                            
-                        default:
-                            break;
-                    }
-                    break;
-                    
-                //"Lost bets in progressions"    
-                case 5:
-                    break;
-                
-                //"Won bets in progressions"    
-                case 6:
-                    break;
-                                       
-                default:
-                    break;
-        }    
-               
-    }
-    */
-   
-    
+  
     private void jCheckBoxProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxProgressionActionPerformed
 
         if(jCheckBoxProgression.isSelected())
-        jPanelProgression.setVisible(true);
+            jPanelProgression.setVisible(true);
         else
-        jPanelProgression.setVisible(false);
+            jPanelProgression.setVisible(false);
     }//GEN-LAST:event_jCheckBoxProgressionActionPerformed
 
     private void jRadioButtonNewProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNewProgressionActionPerformed

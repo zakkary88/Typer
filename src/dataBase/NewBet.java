@@ -307,7 +307,7 @@ public class NewBet extends javax.swing.JPanel {
         jTextFieldProgressionName.setEnabled(false);
         jComboBoxExistingProgression.setEnabled(true);
         
-        DataContainer.dataFromDB.getQueryManager().fillComboBoxExisitingProgression(jComboBoxExistingProgression);
+        jComboBoxExistingProgression.setModel(DataContainer.comboBoxmodelProgressions);
         fillComboBoxBukmacher();
         fillComboBoxType();
         calendar.fillComboBoxDateTime();

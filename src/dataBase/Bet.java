@@ -30,6 +30,7 @@ public class Bet {
     
     public Bet() {}
     
+    //8 variables
     public Bet(int betId, String betName, String date, double odd, double stake, 
             String bukmacher, String note, String type)
     {
@@ -47,6 +48,7 @@ public class Bet {
         this.balance = 0;
     }
     
+    //9 variables
     public Bet(int betId, String betName, String date, double odd, double stake, 
             int partOfProgression, String bukmacher, String note, String type)
     {
@@ -64,6 +66,7 @@ public class Bet {
         this.balance = 0;
     }
     
+    //11 variables
     public Bet(int betId, String betName, String date, double odd, double stake, int partOfProgression,
             int betStatus, String bukmacher, String note, double balance, String type)
     {

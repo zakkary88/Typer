@@ -51,6 +51,7 @@ public class QueryManager {
     private PreparedStatement viewBetNotInProgInfoStmt = null;
     private PreparedStatement viewBetInProgressionInfoStmt = null;
     private PreparedStatement viewProgressionInfoStmt = null;
+    private PreparedStatement viewBetInProgFullInfoStmt = null;
     
     private PreparedStatement viewResolvedBetNotInProgInfoStmt = null;
     private PreparedStatement viewResolvedBetInProgInfoStmt = null;
@@ -67,6 +68,11 @@ public class QueryManager {
     private PreparedStatement endProgressionStmt = null;
     
     private PreparedStatement updateBetStmt = null;
+    
+    //DELETES
+    private PreparedStatement deleteBetStmt = null;
+    private PreparedStatement deleteBetInProgStmt = null;
+    private PreparedStatement deleteDeleteProgressionStmt = null;
     
   
     //ZAPYTANIA
@@ -143,12 +149,17 @@ public class QueryManager {
     private static final String viewBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
     private static final String viewBetInProgressionInfoQuery = 
             "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, p.ProgressionName "
-            + "FROM Bets b, Progressions p WHERE BetId = ? "
+            + "FROM Bets b, Progressions p WHERE b.BetId = ? "
             + "AND b.PartOfProgression = p.ProgressionId";
     private static final String viewProgressionInfoQuery = 
             "SELECT b.BetName, b.Date, b.Odd, b.Stake, b.Bukmacher, b.Type, b.Balance, p.ProgressionName "
-            + "FROM Bets b, Progressions p WHERE ProgressionId = ? "
+            + "FROM Bets b, Progressions p WHERE p.ProgressionId = ? "
             + "AND b.PartOfProgression = p.ProgressionId";
+    private static final String viewBetInProgFullInfoQuery = "SELECT b.BetId, "
+            + "b.BetName, b.Date, b.Odd, b.Stake, b.Status, b.Bukmacher, b.Note, b.Balance, b.Type, "
+            + "p.ProgressionId, p.ProgressionName, p.ProgressionStatus "
+            + "FROM Bets b, Progressions p WHERE b.PartOfProgression = p.ProgressionId "
+            + "AND b.BetId = ?";
     
     //zapytanie sie powatarza - wykonanie na probe
     private static final String viewResolvedBetNotInProgInfoQuery = "SELECT * FROM Bets WHERE BetId = ?";
@@ -191,6 +202,8 @@ public class QueryManager {
             + "Status = ?, Bukmacher = ?, Note = ?, Balance = ?, Type = ? WHERE "
             + "BetId = ?"; 
     
+   //DELETEs
+    private static final String deleteBetQuery = "DELETE FROM Bets WHERE BetId = ?";
        // odzielnie zapytanie do pobierania NOTE !!!!
     
        // laczenie w tabelach przez JOIN    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -401,6 +414,25 @@ public class QueryManager {
                 System.out.println(t.getMessage());
         }
     }
+    
+    public void deleteBet(int id)
+    {
+        try
+        {
+            if(deleteBetStmt == null)
+                deleteBetStmt = conn.prepareStatement(deleteBetQuery);
+            
+            deleteBetStmt.setInt(1, id);
+            
+            int result = deleteBetStmt.executeUpdate();
+            System.out.println("Bet: " + id + " deleted");
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
                 
     public void addBet(String betName, String date, double odd, double stake,
             String bukmacher, String note, String type)
@@ -508,6 +540,28 @@ public class QueryManager {
             for(Throwable t : e)
                 System.out.println(t.getMessage());
         }   
+    }
+    
+    public void addProgression(String progressionName)
+    {
+        try
+        {
+            if(addProgressionStmt == null)
+                addProgressionStmt = conn.prepareStatement(addProgressionQuery);
+            
+            int progressionId = setIdForProgression();
+            
+            addProgressionStmt.setInt(1, progressionId);
+            addProgressionStmt.setString(2, progressionName);
+            
+            int result = addProgressionStmt.executeUpdate();
+            System.out.println("Progression: " + progressionId + " " + progressionName + " added.");
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
     }
     
     public void fillComboBoxExisitingProgression(JComboBox jComboBoxExistingProgression)
@@ -719,6 +773,43 @@ public class QueryManager {
                 System.out.println(t.getMessage());
             return new Bet();
         } 
+    }
+    
+    public BetInProgression getBetInProgression(int id)
+    {
+        try
+        {
+            if(viewBetInProgFullInfoStmt == null)
+                viewBetInProgFullInfoStmt= conn.prepareStatement(viewBetInProgFullInfoQuery);
+            
+            viewBetInProgFullInfoStmt.setInt(1, id);
+            resultSet = viewBetInProgFullInfoStmt.executeQuery();
+            BetInProgression bip = null;
+            
+            while(resultSet.next())
+            {
+                //"SELECT b.BetId, b.BetName, b.Date, b.Odd, b.Stake, b.PartOfProgression, b.Status, b.Bukmacher, "
+                //+ "b.Note, b.Balance, b.Type, p.ProgressionName, p.ProgressionStatus "
+                //public BetInProgression(int betId, String betName, String date, double odd, 
+                //double stake, int betStatus, String bukmacher, String note, double balance, 
+                //String type, int progressionId, String progressionName, int progressionStatus);
+                bip = new BetInProgression(resultSet.getInt(1), resultSet.getString(2), 
+                        resultSet.getString(3), resultSet.getDouble(4), 
+                        resultSet.getDouble(5), resultSet.getInt(6), 
+                        resultSet.getString(7), resultSet.getString(8),
+                        resultSet.getDouble(9), resultSet.getString(10),
+                        resultSet.getInt(11), resultSet.getString(12),
+                        resultSet.getInt(13));
+                                System.out.println(bip.toString());
+            }          
+            return bip;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return new BetInProgression();
+        }
     }
     
     public void viewActiveBetsNotInProgression(LinkedList<Bet> betsNotInProg)

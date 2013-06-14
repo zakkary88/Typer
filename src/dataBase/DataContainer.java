@@ -4,6 +4,8 @@
  */
 package dataBase;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 
@@ -42,6 +44,16 @@ public class DataContainer {
     public static DefaultListModel listModelWonBetsInProg = new DefaultListModel();
     public static DefaultListModel listModelLostBetsInProg = new DefaultListModel();
     public static DefaultListModel listModelCanceledBetsInProg = new DefaultListModel();
+    
+    public static DefaultComboBoxModel comboBoxmodelProgressions = new DefaultComboBoxModel();
+    
+    public static void fillActiveProgressionsCombo()
+    {
+        for(Progression p : dataFromDB.getProgressions())
+        {
+            comboBoxmodelProgressions.addElement(p);
+        }
+    }
     
     public static void clearAllListsModels()
     {
@@ -97,26 +109,23 @@ public class DataContainer {
             listModelProgressions.addElement(p);
         }
     }
-    
+   
     public static void fillTodayBets()
     {
         for(Bet b : dataFromDB.getTodayBets())
             listModelTodayBets.addElement(b);
-        //jListTodayBets.setModel(listModelTodayBets);
     }
     
     public static void fillEndedBetsToUpdate()
     {
         for(Bet b : dataFromDB.getEndedBetsToUpdate())
             listModelEndedBetsToUpdate.addElement(b);
-        //jListEndedBetsToUpdate.setModel(listModelEndedBetsToUpdate);
     }
     
     public static void fillEndedBetsInProgToUpdate()
     {
         for(BetInProgression bip : dataFromDB.getEndedBetsInProgToUpdate())
             listModelEndedBetsInProgToUpdate.addElement(bip);
-        //jListEndedBetsInProgToUpdate.setModel(listModelEndedBetsInProgToUpdate);
     }
     
     public static void fillResolvedBetsNotInProg()

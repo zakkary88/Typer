@@ -35,7 +35,10 @@ public class BetsManager extends javax.swing.JPanel {
         DataContainer.dataFromDB = dataFromDB;
         
         setFields();
-        fillLists();          
+        fillLists();         
+        fillTodayBets();
+        fillEndedBetsToUpdate();
+        fillEndedBetsInProgToUpdate();
     }
     
     private void setFields()
@@ -61,6 +64,8 @@ public class BetsManager extends javax.swing.JPanel {
        
     public static void fillLists()
     {
+        DataContainer.fillActiveProgressionsCombo();
+        
         DataContainer.fillActiveBetsInProgression();
         DataContainer.fillActiveBetsNotInProgression();
         DataContainer.fillAllActiveBetsList();
@@ -69,9 +74,6 @@ public class BetsManager extends javax.swing.JPanel {
         DataContainer.fillTodayBets();
         DataContainer.fillEndedBetsToUpdate();
         DataContainer.fillEndedBetsInProgToUpdate();
-   //     fillTodayBets();
-    //    fillEndedBetsToUpdate();
-   //     fillEndedBetsInProgToUpdate();
         
         DataContainer.fillResolvedBetsNotInProg();
         DataContainer.fillResolvedBetsInProg();
@@ -108,7 +110,6 @@ public class BetsManager extends javax.swing.JPanel {
         jComboBoxBetStatus.addItem("Resolved progressions");
     }
     
-    //TODO to tez mozna do container przeniesc, ale setModel idzie do konstuktora u gory
     private void fillTodayBets()
     {
         jListTodayBets.setModel(DataContainer.listModelTodayBets);
@@ -244,6 +245,11 @@ public class BetsManager extends javax.swing.JPanel {
         });
 
         jButtonDelete.setText("jButton3");
+        jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -649,15 +655,34 @@ public class BetsManager extends javax.swing.JPanel {
                   runEditWindow();
             }
             
+            //TODO okno edit nie wczytuje sie dla betInProgression
             if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
             {
-                  saveBetInProgData(DataContainer.listModelActiveNotInProg, 
+                  saveBetInProgData(DataContainer.listModelActiveInProg, 
                           "Active bets in progressions");
                   runEditWindow();
             }
-
+            
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Won bets in progressions"))
+            {
+                  saveBetInProgData(DataContainer.listModelWonBetsInProg, 
+                          "Won bets in progressions");
+                  runEditWindow();
+            }
+            
+            if(jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets in progressions"))
+            {
+                  saveBetInProgData(DataContainer.listModelLostBetsInProg, 
+                          "Lost bets in progressions");
+                  runEditWindow();
+            }          
         }
     }//GEN-LAST:event_jButtonEditActionPerformed
+
+    private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
+        
+        //TODO dialog z zapytaniem o skasowanie zakladu
+    }//GEN-LAST:event_jButtonDeleteActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddNewBet;
