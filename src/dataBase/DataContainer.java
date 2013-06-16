@@ -20,11 +20,7 @@ public class DataContainer {
     public static int id = 0;
     public static Object object = null;
     public static String listName = "";
-    
-//    public static JList jListEndedBetsToUpdate = new JList();
-//    public static JList jListEndedBetsInProgToUpdate = new JList();
-//    public static JList jListTodayBets = new JList();
-    
+        
     public static DefaultListModel listModelAllActive = new DefaultListModel();
     public static DefaultListModel listModelActiveNotInProg = new DefaultListModel();
     public static DefaultListModel listModelActiveInProg = new DefaultListModel();
@@ -55,8 +51,18 @@ public class DataContainer {
         }
     }
     
+    public static void updateLists()
+    {
+            DataContainer.clearAllListsModels();
+            DataContainer.dataFromDB.clearAllLists();
+            DataContainer.dataFromDB.fillLists();
+            BetsManager.fillLists();   
+    }
+    
     public static void clearAllListsModels()
     {
+        comboBoxmodelProgressions.removeAllElements();
+        
         listModelAllActive.clear();
         listModelActiveNotInProg.clear();
         listModelActiveInProg.clear();

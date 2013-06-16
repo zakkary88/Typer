@@ -22,20 +22,7 @@ public class EditBet extends javax.swing.JPanel {
         initComponents();
         calendar = new Calendar(jComboBoxDay, jComboBoxMonth, jComboBoxYear, jComboBoxHour, jComboBoxMinute);
         setFields();
-        
-        //load zalezy od wybranej listy 
-       if(DataContainer.listName.equals("Active bets in progressions")
-               || DataContainer.listName.equals("Won bets in progressions")
-               || DataContainer.listName.equals("Lost bets in progressions"))
-            loadDataFromDBforBetInProg();
-       
-       // NIE DZIALA JESZCZE - mozliwe, ze wina zapytania lub niepelnych danych zakładu
-        
-        if(DataContainer.listName.equals("Active bets not in progressions")
-                || DataContainer.listName.equals("Won bets not in progressions")
-                || DataContainer.listName.equals("Lost bets not in progressions"))
-            loadDataFromDBforBet();
-        //NIE ZMIENIA SIE ID !!!!
+        loadData();
     } 
 
     /**
@@ -349,6 +336,20 @@ public class EditBet extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void loadData()
+    {
+        //load zalezy od wybranej listy 
+        if(DataContainer.listName.equals("Active bets in progressions")
+               || DataContainer.listName.equals("Won bets in progressions")
+               || DataContainer.listName.equals("Lost bets in progressions"))
+             loadDataFromDBforBetInProg();
+              
+        if(DataContainer.listName.equals("Active bets not in progressions")
+                || DataContainer.listName.equals("Won bets not in progressions")
+                || DataContainer.listName.equals("Lost bets not in progressions"))
+            loadDataFromDBforBet();
+    }
+    
     private void setFields()
     {
         jLabelTitle.setText("Set information for new bet");
@@ -433,7 +434,8 @@ public class EditBet extends javax.swing.JPanel {
     
     private void loadDataFromDBforBetInProg()
     {
-        betInProg = DataContainer.dataFromDB.getQueryManager().getBetInProgression(DataContainer.id);
+        betInProg = DataContainer.dataFromDB.getQueryManager().
+                getBetInProgression(DataContainer.id);
         
         jTextFieldBetName.setText(betInProg.getBetName());
 
@@ -456,13 +458,13 @@ public class EditBet extends javax.swing.JPanel {
         selectStatus(status);
         
         //ustawienie kontrolek progresji
-//        jCheckBoxProgression.setSelected(true);
-//        jPanelProgression.setVisible(true);
-//        jRadioButtonExistingProgression.setSelected(true);      
-//        int progressionId = betInProg.getPartOfProgression();  //to samo, co ponizej
-//        //progressionId = betInProg.getProgression().getProgressionId();
-//        int progIndex = DataContainer.dataFromDB.getProgressionsIndexById(progressionId);
-//        jComboBoxExistingProgression.setSelectedIndex(progIndex);
+        jCheckBoxProgression.setSelected(true);
+        jPanelProgression.setVisible(true);
+        jRadioButtonExistingProgression.setSelected(true);      
+        int progressionId = betInProg.getPartOfProgression();  //to samo, co ponizej
+        //progressionId = betInProg.getProgression().getProgressionId();
+        int progIndex = DataContainer.dataFromDB.getProgressionsIndexById(progressionId);
+        jComboBoxExistingProgression.setSelectedIndex(progIndex);
     }
     
     private void selectData(String date)
@@ -529,13 +531,7 @@ public class EditBet extends javax.swing.JPanel {
         return -1;
     }
    
-   private void updateLists()
-   {
-            DataContainer.clearAllListsModels();
-            DataContainer.dataFromDB.clearAllLists();
-            DataContainer.dataFromDB.fillLists();
-            BetsManager.fillLists();   
-   }
+   
    
    private int setProgressionStatus(int status)
    {
@@ -559,9 +555,7 @@ public class EditBet extends javax.swing.JPanel {
         String bukmacher = jComboBoxBukmacher.getSelectedItem().toString();
         String note = jTextAreaNote.getText();
         String type = jComboBoxType.getSelectedItem().toString();        
-        
-        //TODO po skonczeniu opracownia update - updateLists() wyrzucic na koniec funkcji
-        
+      
         
         //wylacznie autocommita
                 try
@@ -632,8 +626,8 @@ public class EditBet extends javax.swing.JPanel {
             DataContainer.dataFromDB.getQueryManager().updateBet(bet);
         }
         
-        //aktyalizacja wszystkich list
-        updateLists();
+        //aktualizacja wszystkich list
+        DataContainer.updateLists();
     }//GEN-LAST:event_jButtonSaveChangesActionPerformed
   
     private void jCheckBoxProgressionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxProgressionActionPerformed
