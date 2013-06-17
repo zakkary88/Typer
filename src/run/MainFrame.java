@@ -6,10 +6,10 @@ package run;
 
 import coverbooker.CoverBooker;
 import dataBase.BetsManager;
+import dataBase.ChartsManager;
+import dataBase.DataContainer;
+import dataBase.DataFromDB;
 import progressivebooker.ProgressiveBooker;
-import dataBase.ConnectionManager;
-import dataBase.NewBet;
-import dataBase.QueryManager;
 
 
 /**
@@ -18,20 +18,28 @@ import dataBase.QueryManager;
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    private DataFromDB dataFromDB = null; 
+    
     private BetsManager betsManager = null;
     private CoverBooker coverBooker = null;
     private ProgressiveBooker progressiveBooker = null;
+    private ChartsManager chartsManager = null;
     
     public MainFrame() {
         initComponents();
         
         this.setTitle("Typer");
+        
+        dataFromDB = new DataFromDB();
+        DataContainer.dataFromDB = dataFromDB;
                      
         betsManager = new BetsManager();
+        chartsManager = new ChartsManager();
         coverBooker = new CoverBooker();
         progressiveBooker = new ProgressiveBooker();
                
         jTabbedPaneMenu.addTab("Bets Manager", betsManager);
+        jTabbedPaneMenu.addTab("Charts", chartsManager);
         jTabbedPaneMenu.addTab("Progression Simulator", progressiveBooker);
         jTabbedPaneMenu.addTab("Cover Booker Calculator", coverBooker);
     }

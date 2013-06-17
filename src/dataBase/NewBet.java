@@ -17,7 +17,6 @@ public class NewBet extends javax.swing.JPanel {
         initComponents();
         calendar = new Calendar(jComboBoxDay, jComboBoxMonth, jComboBoxYear, jComboBoxHour, jComboBoxMinute);
         setFields();
-        loadDataFromDB();
     }
     
     /**
@@ -308,6 +307,7 @@ public class NewBet extends javax.swing.JPanel {
         jComboBoxExistingProgression.setEnabled(true);
         
         jComboBoxExistingProgression.setModel(DataContainer.comboBoxmodelProgressions);
+        //jComboBoxExistingProgression.setSelectedIndex(0);
         fillComboBoxBukmacher();
         fillComboBoxType();
         calendar.fillComboBoxDateTime();
@@ -332,9 +332,11 @@ public class NewBet extends javax.swing.JPanel {
             jComboBoxBukmacher.addItem(b);
     }
     
-    private void loadDataFromDB()
+    private void refreshComboBox()
     {
-        
+        DataContainer.comboBoxmodelProgressions.removeAllElements();
+        DataContainer.fillActiveProgressionsCombo();
+        jComboBoxExistingProgression.setModel(DataContainer.comboBoxmodelProgressions);
     }
      
     private void jButtonAddBetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddBetActionPerformed
@@ -398,6 +400,9 @@ public class NewBet extends javax.swing.JPanel {
                 DataContainer.listModelActiveInProg.addElement(betInProg);
                 //aktywne progresje
                 DataContainer.listModelProgressions.addElement(prog);
+                
+                //uaktualnienie listy progresji w NewBet
+                refreshComboBox();
             }
         }
         else
@@ -412,9 +417,7 @@ public class NewBet extends javax.swing.JPanel {
             //wszystkie aktywne zaklady
             DataContainer.listModelAllActive.addElement(bet);
             //aktywne zaklady nie w progresji
-            DataContainer.listModelActiveNotInProg.addElement(bet);
-            
-            
+            DataContainer.listModelActiveNotInProg.addElement(bet);           
         }
     }//GEN-LAST:event_jButtonAddBetActionPerformed
 

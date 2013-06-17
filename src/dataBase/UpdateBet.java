@@ -232,17 +232,7 @@ public class UpdateBet extends javax.swing.JFrame {
                 DataContainer.listModelResolvedBetsInProg.addElement(betInProg);
                                
                 //dodanie do 1 z 3 list (wygrany, przegrane, anulowane) (5 z 5)
-                //aktualizacja bazy danych     
-                
-                try
-                {
-                    DataContainer.dataFromDB.getQueryManager().getConn().setAutoCommit(false);
-                }
-                catch(SQLException e)
-                {
-                    System.out.println("autocommit error");
-                }
-                
+                //aktualizacja bazy danych                    
                 DataContainer.dataFromDB.getQueryManager().changeBetStatus(status, DataContainer.id);
                 if(status == 2)
                 {
@@ -251,8 +241,14 @@ public class UpdateBet extends javax.swing.JFrame {
                     int progressionId = betInProg.getProgression().getProgressionId();
                     DataContainer.dataFromDB.getQueryManager().endProgression(progressionId);
                     
-                    //lista progresji
+                    //lista progresji zakonczonych - dodanie
                     DataContainer.listModelResolvedProgressions.addElement(betInProg.getProgression());
+                    //lista progresji aktywnych - usuniecie
+                    DataContainer.listModelProgressions.clear();
+                    int progId = DataContainer.dataFromDB.getQueryManager().getProgressionIdByBetId(DataContainer.id);
+                    int progIndex = DataContainer.dataFromDB.getProgressionsIndexById(progId);
+                    DataContainer.dataFromDB.getProgressions().remove(progIndex);
+                    DataContainer.fillActiveProgressions();
                 }
                 
                 //aktualizacja list zwiazanych z progresja    !!!!  

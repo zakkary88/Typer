@@ -20,7 +20,7 @@ import javax.swing.ListModel;
  */
 public class BetsManager extends javax.swing.JPanel {
 
-    private DataFromDB dataFromDB = null; 
+
     
     private int betId = 0;
     private Bet selectedBet = null;
@@ -30,10 +30,7 @@ public class BetsManager extends javax.swing.JPanel {
     {
         initComponents();
         this.setSize(400, 400);
-        
-        dataFromDB = new DataFromDB();
-        DataContainer.dataFromDB = dataFromDB;
-        
+       
         setFields();
         fillLists();         
         fillTodayBets();
@@ -484,12 +481,14 @@ public class BetsManager extends javax.swing.JPanel {
         
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets not in progressions"))
                     {
-                        info = dataFromDB.getBetNotInProgInfo((Bet)jListBets.getSelectedValue());
+                        info = DataContainer.dataFromDB.getBetNotInProgInfo
+                                ((Bet)jListBets.getSelectedValue());
                     }
         
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active bets in progressions"))
                     {
-                        info = dataFromDB.getBetInProgressionInfo((BetInProgression)jListBets.getSelectedValue());
+                        info = DataContainer.dataFromDB.getBetInProgressionInfo
+                                ((BetInProgression)jListBets.getSelectedValue());
                     }
             
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Active progressions"))
@@ -500,7 +499,7 @@ public class BetsManager extends javax.swing.JPanel {
                         
                         DataContainer.object = jListBets.getSelectedValue();
                         Progression prog = (Progression) DataContainer.object;
-                        info = dataFromDB.getProgressionInfo(prog);       
+                        info = DataContainer.dataFromDB.getProgressionInfo(prog);       
                     }
         
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets not in progressions")
@@ -508,7 +507,8 @@ public class BetsManager extends javax.swing.JPanel {
                             || jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets not in progressions")
                             || jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets not in progressions"))
                     {
-                        info = dataFromDB.getResolvedBetNotInProgInfo((Bet) jListBets.getSelectedValue());
+                        info = DataContainer.dataFromDB.getResolvedBetNotInProgInfo
+                                ((Bet) jListBets.getSelectedValue());
                     }
                     
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved bets in progressions")
@@ -516,15 +516,16 @@ public class BetsManager extends javax.swing.JPanel {
                             || jComboBoxBetStatus.getSelectedItem().toString().equals("Lost bets in progressions")
                             || jComboBoxBetStatus.getSelectedItem().toString().equals("Canceled bets in progressions"))
                     {
-                        info = dataFromDB.getResolvedBetInProgInfo((BetInProgression) jListBets.getSelectedValue());
+                        info = DataContainer.dataFromDB.getResolvedBetInProgInfo
+                                ((BetInProgression) jListBets.getSelectedValue());
                     }
                     
                     if(jComboBoxBetStatus.getSelectedItem().toString().equals("Resolved progressions"))
                     {
                         Progression prog = (Progression) jListBets.getSelectedValue();
-                        double balance = dataFromDB.getResolvedProgressionBalance(prog);
+                        double balance = DataContainer.dataFromDB.getResolvedProgressionBalance(prog);
                         info = "Progression balance: " + Double.toString(balance) + "\n" +
-                                dataFromDB.getProgressionInfo(prog);
+                                DataContainer.dataFromDB.getProgressionInfo(prog);
                     }
         
                     jTextAreaBetInfo.setText(info);

@@ -31,7 +31,7 @@ public class Progression {
     @Override
     public String toString()
     {
-        return progressionId + " " + progressionName + " " + progressionStatus;
+        return progressionName;
     }
     
     public void endProgression()

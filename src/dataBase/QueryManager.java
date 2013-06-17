@@ -26,7 +26,9 @@ public class QueryManager {
     private PreparedStatement addBetStmt = null;
     private PreparedStatement addBetInProgressionStmt = null;
     private PreparedStatement addProgressionStmt = null;
+    
     private PreparedStatement getIdForBetInProgressionExistingStmt = null;
+    private PreparedStatement getProgressionIdByBetIdStmt = null;
     
     //WYŚWIETLANIE
     private PreparedStatement viewProgressionsNamesStmt = null;
@@ -55,7 +57,12 @@ public class QueryManager {
     
     private PreparedStatement viewResolvedBetNotInProgInfoStmt = null;
     private PreparedStatement viewResolvedBetInProgInfoStmt = null;
+    
     private PreparedStatement viewResolvedProgressionBalanceStmt = null;
+    private PreparedStatement viewYieldStmt = null;
+    private PreparedStatement viewYieldInProgressionsStmt = null;
+    private PreparedStatement viewYieldNotInProgsStmt = null;
+    private PreparedStatement viewYearsWithMonthStmt =  null;
     
     private PreparedStatement viewTodayBetsStmt = null;
     private PreparedStatement viewEndedBetsToUpdateStmt = null; 
@@ -87,8 +94,13 @@ public class QueryManager {
     private static final String addBetInProgressionQuery = "INSERT INTO Bets Values(?,?,?,?,?,?,1,?,?,0,?)"; 
     private static final String addProgressionQuery = "INSERT INTO Progressions VALUES(?,?,1)"; // 1 - trwa
    
+    
+    //SELECTs
     private static final String getIdForBetInProgressionExistingQuery = "SELECT ProgressionId FROM Progressions "
-            + "WHERE progressionName = ?";
+            + "WHERE ProgressionName = ?";
+    private static final String getProgressionIdByBetIdQuery = "SELECT p.ProgressionId FROM "
+            + "Progressions p JOIN Bets b ON p.ProgressionId = b.PartOfProgression "
+            + "WHERE b.BetId = ?";
     
     //nazwy progresji aktywnych
     private static final String viewProgressionsNamesQuery = "SELECT ProgressionName FROM Progressions "
@@ -166,10 +178,26 @@ public class QueryManager {
     private static final String viewResolvedBetInProgInfoQuery = "SELECT b.BetName, b.Date, b.Odd, "
             + "b.Stake, b.Bukmacher, b.Type, b.Balance, p.ProgressionName "
             + "FROM Bets b, Progressions p WHERE BetId = ?";
+    
     private static final String viewResolvedProgressionBalanceQuery = "SELECT SUM(b.Balance) "
-            + "as ProgressionBalance FROM Bets b, Progressions p WHERE ProgressionId = ? " 
+            + "AS ProgressionBalance FROM Bets b, Progressions p WHERE ProgressionId = ? " 
             + "AND b.PartOfProgression = p.ProgressionId";
-            
+    
+    //suma wszystkich wynikow (wygrana - stawka) / stawka * 100 w zakonczonych zakladach
+    //data w formacie YYYY-MM
+    private static final String viewYieldQuery = "SELECT "
+            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
+            + "WHERE b.Status IN (2,3) AND SUBSTR(b.Date,0,8) = ?";
+    private static final String viewYieldInProgressionsQuery = "SELECT "
+            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
+            + "WHERE b.Status IN (2,3) AND b.PartOfProgression NOT LIKE 0 AND "
+            + "SUBSTR(b.Date,0,8) = ?";
+    private static final String viewYieldNotInProgQuery = "SELECT "
+            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
+            + "WHERE b.Status IN (2,3) AND b.PartOfProgression = 0 "
+            + "SUBSTR(b.Date,0,8) = ?";
+    private static final String viewYearsWithMonthQuery = 
+            "SELECT DISTINCT SUBSTR(b.Date,0,8) FROM Bets b";
     
     //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
@@ -267,6 +295,29 @@ public class QueryManager {
         }     
     }
     
+    public int getProgressionIdByBetId(int id)
+    {
+        try
+        {
+            if(getProgressionIdByBetIdStmt == null)
+                getProgressionIdByBetIdStmt = conn.prepareStatement(getProgressionIdByBetIdQuery);
+            
+            getProgressionIdByBetIdStmt.setInt(1, id);
+            resultSet = getProgressionIdByBetIdStmt.executeQuery();
+            
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
     private int getIdForBetInProgressionExisting(String progressionName)
     {
         try
@@ -277,8 +328,9 @@ public class QueryManager {
             getIdForBetInProgressionExistingStmt.setString(1, progressionName);
             
             resultSet = getIdForBetInProgressionExistingStmt.executeQuery();
-            
+                      
             int result = resultSet.getInt(1);
+            System.out.println("inner function: " + progressionName + " " + result);
             
             resultSet.close();
             return result;
@@ -548,6 +600,7 @@ public class QueryManager {
             int result = addBetInProgressionStmt.executeUpdate();
             System.out.println(result + " inserted");
             System.out.println(betId + " " + betName);
+            System.out.println(progressionName +  "ID:" + progressionId);
             
         }
         catch(SQLException e)
@@ -733,6 +786,29 @@ public class QueryManager {
                 //dodaje od razu jako nierozstrzygniete - konstruktor
                todayBets.add(todayBet);
                //System.out.println(resultSet.getString(3));
+            }
+            
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }
+    }
+    
+    public void viewYearsWithMoths(LinkedList<String> yearsMonths)
+    {
+        try
+        {
+            if(viewYearsWithMonthStmt == null)
+                viewYearsWithMonthStmt = conn.prepareStatement(viewYearsWithMonthQuery);
+            
+            resultSet = viewYearsWithMonthStmt.executeQuery();
+            
+            while(resultSet.next())
+            {
+                yearsMonths.add(resultSet.getString(1));
             }
             
             resultSet.close();
@@ -1368,6 +1444,73 @@ public class QueryManager {
                 System.out.println(t.getMessage());
             return "BetInProgression Error";
         }
+    }
+    
+    public double viewYield(String yearMonth)
+    {
+        try
+        {
+            if(viewYieldStmt == null)
+                viewYieldStmt = conn.prepareStatement(viewYieldQuery);
+            
+            viewYieldStmt.setString(1, yearMonth);
+            resultSet = viewYieldStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }      
+    }
+    
+    public double viewYieldInProgressions(String yearMonth)
+    {
+        try
+        {
+            if(viewYieldInProgressionsStmt == null)
+                viewYieldInProgressionsStmt = conn.prepareStatement(viewYieldInProgressionsQuery);
+            
+            viewYieldInProgressionsStmt.setString(1, yearMonth);
+            resultSet = viewYieldInProgressionsStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }    
+    }
+    
+    public double viewYieldNotInProgs(String yearMonth)
+    {
+        try
+        {
+            if(viewYieldNotInProgsStmt == null)
+                viewYieldNotInProgsStmt = conn.prepareStatement(viewYieldNotInProgQuery);
+            
+            viewYieldNotInProgsStmt.setString(1, yearMonth);
+            resultSet = viewYieldNotInProgsStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+        
     }
     
     public double viewResolvedProgressionBalance(int id)
