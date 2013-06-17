@@ -7,13 +7,13 @@ package dataBase;
 import java.awt.Dimension;
 import java.util.LinkedList;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.ChartFactory;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
-import org.jfree.data.xy.XYSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+
 
 /**
  *
@@ -26,8 +26,9 @@ public class ChartsGenerator {
     private int lostInProg = 0;
     private int lostNotInProg = 0;
     
-    private LinkedList<String> yearsMonths = new LinkedList<String>();
-    private LinkedList<Double> yieldMonth = new LinkedList<Double>();
+    private LinkedList<String> dates = new LinkedList<String>();
+    private LinkedList<Double> yield = new LinkedList<Double>();
+    private LinkedList<Day> days = new LinkedList<Day>();
     
     public ChartsGenerator()
     {
@@ -38,17 +39,46 @@ public class ChartsGenerator {
         lostNotInProg = DataContainer.listModelLostBetsNotInProg.size();
         
         loadDataFromDB();
+        fillDays();      
+    }
+    
+    private Day getDate(String dateFromBD)
+    {
+        String monthString = "";
+        String yearString = "";
+        String dayString = "";
+        
+        String [] split = dateFromBD.split("-");
+        String [] split2 = split[2].split(" ");
+        
+        yearString = split[0];
+        monthString = split[1];     
+        dayString = split2[0];
+        
+        int year = Integer.parseInt(yearString);
+        int month = Integer.parseInt(monthString);
+        int day = Integer.parseInt(dayString);       
+        Day date = new Day(day, month, year);
+        
+        //System.out.println(day + " " + month + " " + yearString);
+        return date;                
+    }
+    
+    private void fillDays()
+    {
+        for(String date : dates)
+            days.add(getDate(date));        
     }
     
     private void loadDataFromDB()
     {
-         DataContainer.dataFromDB.getQueryManager().viewYearsWithMoths(yearsMonths);
-         double yield = 0.0;
+         DataContainer.dataFromDB.getQueryManager().viewDates(getDates());
+         double yieldValue = 0.0;
          
-         for(String yearMonth : yearsMonths)
+         for(String date : getDates())
          {
-             yield = DataContainer.dataFromDB.getQueryManager().viewYield(yearMonth);
-             yieldMonth.add(yield);
+             yieldValue = DataContainer.dataFromDB.getQueryManager().viewYield(date);
+             yield.add(yieldValue);
          }
     }
        
@@ -73,6 +103,15 @@ public class ChartsGenerator {
     public ChartPanel drawEfficiencyNotInProgChart()
     {
          JFreeChart chart = setEfficiencyNotInProgChart();
+         ChartPanel cp = new ChartPanel(chart, false);
+         cp.setPreferredSize(new Dimension(300, 300));
+
+         return cp;         
+    }
+    
+    public ChartPanel drawYieldByDatesChart()
+    {
+         JFreeChart chart = setYieldTimeSeries();
          ChartPanel cp = new ChartPanel(chart, false);
          cp.setPreferredSize(new Dimension(300, 300));
 
@@ -135,85 +174,32 @@ public class ChartsGenerator {
     
     private JFreeChart setYieldTimeSeries()
     {
-        TimeSeries series = new TimeSeries("Population", Day.class);
+        TimeSeries series = new TimeSeries("Yield", Day.class);
+        TimeSeries yieldFinal = new TimeSeries("Yield final", Day.class);
+        double yieldFinalValue = DataContainer.dataFromDB.getQueryManager().viewFinalYield();
         
-        for(int i=0; i<yearsMonths.size(); ++i)
-            series.add(new Day(i, i, i), yieldMonth.get(i));
+        for(int i=0; i<days.size(); ++i)
+        {
+            series.add(days.get(i), getYield().get(i));    
+            yieldFinal.add(days.get(i), yieldFinalValue);
+        }
         
-        JFreeChart chart = null;
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(series);
+        dataset.addSeries(yieldFinal);
         
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            "Yield by date",
+            "Date",
+            "Yield in %",
+            dataset,
+            true,
+            true,
+            false);
+
         return chart;
     }
-
-/*
- * series.add(1, 1);
-series.add(1, 2);
-series.add(2, 1);
-series.add(3, 9);
-series.add(4, 10);
-// Add the series to your data set
-XYSeriesCollection dataset = new XYSeriesCollection();
-dataset.addSeries(series);
-// Generate the graph
-JFreeChart chart = ChartFactory.createXYLineChart(
-"XY Chart", // Title
-"x-axis", // x-axis Label
-"y-axis", // y-axis Label
-dataset, // Dataset
-PlotOrientation.VERTICAL, // Plot Orientation
-true, // Show Legend
-true, // Use tooltips
-false
-* 
-* /
- */
-
-/*
- public class TarcieWykres extends JFrame{
     
-    public TarcieWykres(String nazwa, LinkedList<DaneWykresu> dane, 
-            LinkedList<DaneWykresu> daneVT, LinkedList<String> daneNawierzchnia)
-    {
-         JFreeChart wykres = StworzWykres(nazwa, dane, daneVT, daneNawierzchnia);
-         
-         ChartPanel wykresPanel = new ChartPanel(wykres,false);
-         wykresPanel.setPreferredSize(new Dimension(500,500));
-
-         setContentPane(wykresPanel);
-         setDefaultCloseOperation(this.DISPOSE_ON_CLOSE);
-    }
-
-    public JFreeChart StworzWykres(String nazwa, LinkedList<DaneWykresu> dane,
-            LinkedList<DaneWykresu> daneVT, LinkedList<String> daneNawierzchnia)
-    {
-        DefaultCategoryDataset wykres_dane = new DefaultCategoryDataset();
-        
-        for(int i=0; i<dane.size(); ++i)
-        {         
-            String opis_reakcja = "PrÄ™dkoĹ›Ä‡ poczÄ…tkowa: " + daneVT.get(i).dana1 + " m/s"
-                    + " | " + "Czas reakcji: " + daneVT.get(i).dana2 + " s"
-                    + " | " + "Stan nawierzchni: " + daneNawierzchnia.get(i);
-            
-            wykres_dane.setValue(dane.get(i).dana1, "bez reakcji", opis_reakcja);
-            wykres_dane.setValue(dane.get(i).dana2, "z reakcja",  opis_reakcja);
-        }
-               
-        JFreeChart wykres = ChartFactory.createBarChart3D(
-                "Wplyw predkosci na droge hamowania",
-                "Hamowanie bez uwzglÄ™dnienia reakcji i z uwzglÄ™dnieniem",
-                "Droga - S[m]", 
-                wykres_dane, 
-                PlotOrientation.HORIZONTAL,
-                true, 
-                true, 
-                false);
-        
-        return wykres;
-    }  
-}
-
- */
-
     public int getWonInProg() 
     {
         return wonInProg;
@@ -254,13 +240,33 @@ false
         this.lostNotInProg = lostNotInProg;
     }
 
-    public LinkedList<String> getYearsMonths() 
+    public LinkedList<String> getDates() 
     {
-        return yearsMonths;
+        return dates;
+    }
+    
+    public void setDates(LinkedList<String> dates) 
+    {
+        this.dates = dates;
     }
 
-    public void setYearsMonths(LinkedList<String> yearsMonths) 
+    public LinkedList<Double> getYield() 
     {
-        this.yearsMonths = yearsMonths;
+        return yield;
+    }
+
+    public void setYield(LinkedList<Double> yield) 
+    {
+        this.yield = yield;
+    }
+
+    public LinkedList<Day> getDays() 
+    {
+        return days;
+    }
+
+    public void setDays(LinkedList<Day> days) 
+    {
+        this.days = days;
     }
 }

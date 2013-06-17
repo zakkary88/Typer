@@ -101,7 +101,7 @@ public class ChartsManager extends javax.swing.JPanel {
                 jComboBoxChartType.removeAll();
                 
                 if(jComboBoxChartType.getSelectedItem().toString().equals("Efficiency"))
-                    jPanelChart.add(chartsGenerator.drawEfficiencyChart(),BorderLayout.CENTER);
+                    jPanelChart.add(chartsGenerator.drawEfficiencyChart(), BorderLayout.CENTER);
            
                 if(jComboBoxChartType.getSelectedItem().toString().equals("Efficiency in progressions"))
                     jPanelChart.add(chartsGenerator.drawEfficiencyInProgressionChart(), BorderLayout.CENTER);
@@ -110,9 +110,7 @@ public class ChartsManager extends javax.swing.JPanel {
                     jPanelChart.add(chartsGenerator.drawEfficiencyNotInProgChart(), BorderLayout.CENTER);
         
                 if(jComboBoxChartType.getSelectedItem().toString().equals("Yield"))
-                {
-                    System.out.println(chartsGenerator.getYearsMonths().toString());
-                }
+                    jPanelChart.add(chartsGenerator.drawYieldByDatesChart(), BorderLayout.CENTER);
 
                 jPanelChart.validate();
             }

@@ -62,7 +62,8 @@ public class QueryManager {
     private PreparedStatement viewYieldStmt = null;
     private PreparedStatement viewYieldInProgressionsStmt = null;
     private PreparedStatement viewYieldNotInProgsStmt = null;
-    private PreparedStatement viewYearsWithMonthStmt =  null;
+    private PreparedStatement viewDatesStmt =  null;
+    private PreparedStatement viewFinalYieldStmt = null;
     
     private PreparedStatement viewTodayBetsStmt = null;
     private PreparedStatement viewEndedBetsToUpdateStmt = null; 
@@ -184,20 +185,23 @@ public class QueryManager {
             + "AND b.PartOfProgression = p.ProgressionId";
     
     //suma wszystkich wynikow (wygrana - stawka) / stawka * 100 w zakonczonych zakladach
-    //data w formacie YYYY-MM
+    //data w formacie YYYY-MM-DD
     private static final String viewYieldQuery = "SELECT "
             + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
-            + "WHERE b.Status IN (2,3) AND SUBSTR(b.Date,0,8) = ?";
+            + "WHERE b.Status IN (2,3) AND SUBSTR(b.Date,0,11) = ?";
     private static final String viewYieldInProgressionsQuery = "SELECT "
             + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
             + "WHERE b.Status IN (2,3) AND b.PartOfProgression NOT LIKE 0 AND "
-            + "SUBSTR(b.Date,0,8) = ?";
+            + "SUBSTR(b.Date,0,11) = ?";
     private static final String viewYieldNotInProgQuery = "SELECT "
             + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
             + "WHERE b.Status IN (2,3) AND b.PartOfProgression = 0 "
-            + "SUBSTR(b.Date,0,8) = ?";
-    private static final String viewYearsWithMonthQuery = 
-            "SELECT DISTINCT SUBSTR(b.Date,0,8) FROM Bets b";
+            + "SUBSTR(b.Date,0,11) = ?";
+    private static final String viewDatesQuery = 
+            "SELECT DISTINCT SUBSTR(b.Date,0,11) FROM Bets b";
+    private static final String viewFinalYieldQuery = 
+            "SELECT SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
+            + "WHERE b.Status IN (2,3)";
     
     //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
@@ -797,18 +801,18 @@ public class QueryManager {
         }
     }
     
-    public void viewYearsWithMoths(LinkedList<String> yearsMonths)
+    public void viewDates(LinkedList<String> dates)
     {
         try
         {
-            if(viewYearsWithMonthStmt == null)
-                viewYearsWithMonthStmt = conn.prepareStatement(viewYearsWithMonthQuery);
+            if(viewDatesStmt == null)
+                viewDatesStmt = conn.prepareStatement(viewDatesQuery);
             
-            resultSet = viewYearsWithMonthStmt.executeQuery();
+            resultSet = viewDatesStmt.executeQuery();
             
             while(resultSet.next())
             {
-                yearsMonths.add(resultSet.getString(1));
+                dates.add(resultSet.getString(1));
             }
             
             resultSet.close();
@@ -1443,6 +1447,27 @@ public class QueryManager {
             for(Throwable t : e)
                 System.out.println(t.getMessage());
             return "BetInProgression Error";
+        }
+    }
+    
+    public double viewFinalYield()
+    {
+        try
+        {
+            if(viewFinalYieldStmt == null)
+                viewFinalYieldStmt = conn.prepareStatement(viewFinalYieldQuery);
+
+            resultSet = viewFinalYieldStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
         }
     }
     
