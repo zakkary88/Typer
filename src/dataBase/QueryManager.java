@@ -23,6 +23,13 @@ public class QueryManager {
     private PreparedStatement countAllBetsStmt = null;
     private PreparedStatement countAllProgressionsStmt = null;
     
+    private PreparedStatement countWonBetsByDateStmt = null;
+    private PreparedStatement countLostBetsByDateStmt = null;
+    private PreparedStatement countWonBetsByDateInProgStmt = null;
+    private PreparedStatement countLostBetsByDateInProgStmt = null;
+    private PreparedStatement countWonBetsByDateNotInProgStmt = null;
+    private PreparedStatement countLostBetsByDateNotInProgStmt = null;
+       
     private PreparedStatement addBetStmt = null;
     private PreparedStatement addBetInProgressionStmt = null;
     private PreparedStatement addProgressionStmt = null;
@@ -59,8 +66,7 @@ public class QueryManager {
     private PreparedStatement viewResolvedBetInProgInfoStmt = null;
     
     private PreparedStatement viewResolvedProgressionBalanceStmt = null;
-    private PreparedStatement viewDatesStmt =  null;
-        
+       
     private PreparedStatement viewWonBalanceByDateStmt = null;
     private PreparedStatement viewAllStakesSumByDateStmt = null;
     private PreparedStatement viewWonBalanceByDateInProgStmt = null;
@@ -68,6 +74,8 @@ public class QueryManager {
     private PreparedStatement viewWonBalanceByDateNotInProgStmt = null;
     private PreparedStatement viewAllStakesSumByDateNotInProgStmt = null; 
     
+    private PreparedStatement viewDatesStmt =  null;
+    private PreparedStatement viewYearsMonthsStmt = null;
     private PreparedStatement viewTodayBetsStmt = null;
     private PreparedStatement viewEndedBetsToUpdateStmt = null; 
     private PreparedStatement viewEndedBetsInProgressionToUpdateStmt = null;
@@ -90,6 +98,31 @@ public class QueryManager {
     private static final String countAllBetsQuery = "SELECT count(*) FROM Bets";
     private static final String countAllProgressionsQuery = "SELECT count(*) FROM Progressions";
     
+    //data w formacie YYYY-MM-DD
+    private static final String viewDatesQuery = 
+            "SELECT DISTINCT SUBSTR(b.Date,0,11) FROM Bets b";
+    //data w formacie YYYY-MM
+    private static final String viewYearsMonthsQuery = 
+            "SELECT DISTINCT SUBSTR(b.Date,0,7) FROM Bets b";
+   
+    //data w formacie YYYY-MM
+    private static final String countWonBetsByDateQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 2 AND SUBSTR(b.Date,0,7) = ?";
+    private static final String countLostBetsByDateQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 3 AND SUBSTR(b.Date,0,7) = ?";
+    private static final String countWonBetsByDateInProgQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 2 "
+            + "AND b.PartOfProgression NOT LIKE 0 AND SUBSTR(b.Date,0,7) = ?";
+    private static final String countLostBetsByDateInProgQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 3 "
+            + "AND b.PartOfProgression NOT LIKE 0 AND SUBSTR(b.Date,0,7) = ?";
+    private static final String countWonBetsByDateNotInProgQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 2 "
+            + "AND b.PartOfProgression = 0 AND SUBSTR(b.Date,0,7) = ?";
+    private static final String countLostBetsByDateNotInProgQuery = 
+            "SELECT count(*) FROM Bets b WHERE b.Status = 3 "
+            + "AND b.PartOfProgression = 0 AND SUBSTR(b.Date,0,7) = ?";
+      
     //INSERTs
     //((1)betId, (2)betName, (3)date, (4)odd, (5)stake, (6)partOfProgression - progressionId,
     // (7)betStatus, (8)bukmacher, (9)note, (10)balance, (11)type)
@@ -97,8 +130,7 @@ public class QueryManager {
     private static final String addBetQuery = "INSERT INTO Bets VALUES(?,?,?,?,?,0,1,?,?,0,?)";
     private static final String addBetInProgressionQuery = "INSERT INTO Bets Values(?,?,?,?,?,?,1,?,?,0,?)"; 
     private static final String addProgressionQuery = "INSERT INTO Progressions VALUES(?,?,1)"; // 1 - trwa
-   
-    
+     
     //SELECTs
     private static final String getIdForBetInProgressionExistingQuery = "SELECT ProgressionId FROM Progressions "
             + "WHERE ProgressionName = ?";
@@ -187,11 +219,6 @@ public class QueryManager {
             + "AS ProgressionBalance FROM Bets b, Progressions p WHERE ProgressionId = ? " 
             + "AND b.PartOfProgression = p.ProgressionId";
     
-    //suma wszystkich wynikow (wygrana - stawka) / stawka * 100 w zakonczonych zakladach
-    //data w formacie YYYY-MM-DD
-    private static final String viewDatesQuery = 
-            "SELECT DISTINCT SUBSTR(b.Date,0,11) FROM Bets b";
-    
     private static final String viewWonBalanceByDateQuery =
             "SELECT SUM(b.Balance) FROM Bets b WHERE b.Status = 2 "
             + "AND SUBSTR(b.Date,0,11) = ?";
@@ -273,6 +300,138 @@ public class QueryManager {
             
             resultSet = countAllBetsStmt.executeQuery();
             
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countWonBetsByDate(String yearMonth)
+    {
+        try
+        {
+            if(countWonBetsByDateStmt == null)
+                countWonBetsByDateStmt = conn.prepareStatement(countWonBetsByDateQuery);
+            
+            countWonBetsByDateStmt.setString(1, yearMonth);
+            resultSet = countWonBetsByDateStmt.executeQuery();
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countWonBetsByDateInProg(String yearMonth)
+    {
+        try
+        {
+            if(countWonBetsByDateInProgStmt == null)
+                countWonBetsByDateInProgStmt = conn.prepareStatement(countWonBetsByDateInProgQuery);
+            
+            countWonBetsByDateInProgStmt.setString(1, yearMonth);
+            resultSet = countWonBetsByDateInProgStmt.executeQuery();
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countWonBetsByDateNotInProg(String yearMonth)
+    {
+        try
+        {
+            if(countWonBetsByDateNotInProgStmt == null)
+                countWonBetsByDateNotInProgStmt = conn.prepareStatement(countWonBetsByDateNotInProgQuery);
+            
+            countWonBetsByDateNotInProgStmt.setString(1, yearMonth);
+            resultSet = countWonBetsByDateNotInProgStmt.executeQuery();
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countLostBetsByDate(String yearMonth)
+    {
+        try
+        {
+            if(countLostBetsByDateStmt == null)
+                countLostBetsByDateStmt = conn.prepareStatement(countLostBetsByDateQuery);
+            
+            countLostBetsByDateStmt.setString(1, yearMonth);
+            resultSet = countLostBetsByDateStmt.executeQuery();
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countLostBetsByDateInProg(String yearMonth)
+    {
+        try
+        {
+            if(countLostBetsByDateInProgStmt == null)
+                countLostBetsByDateInProgStmt = conn.prepareStatement(countLostBetsByDateInProgQuery);
+            
+            countLostBetsByDateInProgStmt.setString(1, yearMonth);
+            resultSet = countLostBetsByDateInProgStmt.executeQuery();
+            int result = resultSet.getInt(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+            return -1;
+        }
+    }
+    
+    public int countLostBetsByDateNotInProg(String yearMonth)
+    {
+        try
+        {
+            if(countLostBetsByDateNotInProgStmt == null)
+                countLostBetsByDateNotInProgStmt = conn.prepareStatement(countLostBetsByDateNotInProgQuery);
+            
+            countLostBetsByDateNotInProgStmt.setString(1, yearMonth);
+            resultSet = countLostBetsByDateNotInProgStmt.executeQuery();
             int result = resultSet.getInt(1);
             
             resultSet.close();
@@ -830,6 +989,29 @@ public class QueryManager {
             for(Throwable t : e)
                 System.out.println(t.getMessage());
         }
+    }
+    
+    public void viewYearsMonths(LinkedList<String> yearsMonths)
+    {
+        try
+        {
+            if(viewYearsMonthsStmt == null)
+                viewYearsMonthsStmt = conn.prepareStatement(viewYearsMonthsQuery);
+            
+            resultSet = viewYearsMonthsStmt.executeQuery();
+            
+            while(resultSet.next())
+            {
+                yearsMonths.add(resultSet.getString(1));
+            }
+            
+            resultSet.close();
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(t.getMessage());
+        }     
     }
     
     public void viewActiveProgressions(LinkedList<Progression> progressions)

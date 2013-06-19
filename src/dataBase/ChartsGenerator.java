@@ -10,6 +10,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -28,6 +30,14 @@ public class ChartsGenerator {
     
     private LinkedList<String> dates = new LinkedList<String>();
     private LinkedList<Day> days = new LinkedList<Day>();
+    private LinkedList<String> yearsMonths = new LinkedList<String>();
+    
+    private LinkedList<Integer> wonBetsByDate = new LinkedList<Integer>();
+    private LinkedList<Integer> lostBetsByDate = new LinkedList<Integer>();   
+    private LinkedList<Integer> wonBetsByDateInProg = new LinkedList<Integer>();
+    private LinkedList<Integer> lostBetsByDateInProg = new LinkedList<Integer>();
+    private LinkedList<Integer> wonBetsByDateNotInProg = new LinkedList<Integer>();
+    private LinkedList<Integer> lostBetsByDateNotInProg = new LinkedList<Integer>();
     
     private LinkedList<Double> wonBalance = new LinkedList<Double>();
     private LinkedList<Double> stakesSum = new LinkedList<Double>();
@@ -85,6 +95,33 @@ public class ChartsGenerator {
     private void loadDataFromDB()
     {
          DataContainer.dataFromDB.getQueryManager().viewDates(getDates());
+         DataContainer.dataFromDB.getQueryManager().viewYearsMonths(yearsMonths);
+         
+         for(String yearMonth : yearsMonths)
+         {
+             //wszystkie zaklady
+             int wonBetsInYM = DataContainer.dataFromDB.getQueryManager().countWonBetsByDate(yearMonth);
+             int lostBetsInYM = DataContainer.dataFromDB.getQueryManager().countLostBetsByDate(yearMonth);
+             
+             wonBetsByDate.add(wonBetsInYM);
+             lostBetsByDate.add(lostBetsInYM);
+             
+             //zaklady w progresjach
+             int wonBetsInYMInProg = DataContainer.dataFromDB.getQueryManager().countWonBetsByDateInProg(yearMonth);
+             int lostBetsInYMInProg = DataContainer.dataFromDB.getQueryManager().countLostBetsByDateInProg(yearMonth);
+             
+             wonBetsByDateInProg.add(wonBetsInYMInProg);
+             lostBetsByDateInProg.add(lostBetsInYMInProg);
+             
+             //zaklady nie w progresjach
+             int wonBetsInYMNotInProg = DataContainer.dataFromDB.getQueryManager().
+                     countWonBetsByDateNotInProg(yearMonth);
+             int lostBetsInYMNotInProg = DataContainer.dataFromDB.getQueryManager().
+                     countLostBetsByDateNotInProg(yearMonth);
+             
+             wonBetsByDateNotInProg.add(wonBetsInYMNotInProg);
+             lostBetsByDateNotInProg.add(lostBetsInYMNotInProg);       
+         }
          
          for(String date : getDates())
          {
@@ -247,6 +284,33 @@ public class ChartsGenerator {
          return cp;
     }
     
+    public ChartPanel drawWonLostBarChart()
+    {
+        JFreeChart chart = setWonLostBarChart();
+        ChartPanel cp = new ChartPanel(chart, false);
+        cp.setPreferredSize(new Dimension(300, 300));
+
+        return cp;
+    }
+    
+    public ChartPanel drawWonLostInProgBarChart()
+    {
+        JFreeChart chart = setWonLostInProgBarChart();
+        ChartPanel cp = new ChartPanel(chart, false);
+        cp.setPreferredSize(new Dimension(300, 300));
+
+        return cp;
+    }
+    
+    public ChartPanel drawWonLostNotInProgBarChart()
+    {
+        JFreeChart chart = setWonLostNotInProgBarChart();
+        ChartPanel cp = new ChartPanel(chart, false);
+        cp.setPreferredSize(new Dimension(300, 300));
+
+        return cp;
+    }
+    
     private JFreeChart setEfficiencyChart()
     {           
         int won = getWonInProg() + getWonNotInProg();
@@ -385,6 +449,75 @@ public class ChartsGenerator {
             true,
             false);
 
+        return chart;
+    }
+    
+    private JFreeChart setWonLostBarChart()
+    {
+        DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+        
+        for(int i=0; i<yearsMonths.size(); i++)
+        {
+            dataSet.addValue(wonBetsByDate.get(i), "Won", yearsMonths.get(i));
+            dataSet.addValue(lostBetsByDate.get(i), "Lost", yearsMonths.get(i));
+        }
+        
+        JFreeChart chart = ChartFactory.createBarChart3D(
+                "Won/Lost",
+                "Year-Month",
+                "Amount of bets", 
+                dataSet, 
+                PlotOrientation.VERTICAL,
+                true, 
+                true, 
+                false);
+        
+        return chart;
+    }
+    
+    private JFreeChart setWonLostInProgBarChart()
+    {
+        DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+        
+        for(int i=0; i<yearsMonths.size(); i++)
+        {
+            dataSet.addValue(wonBetsByDateInProg.get(i), "Won", yearsMonths.get(i));
+            dataSet.addValue(lostBetsByDateInProg.get(i), "Lost", yearsMonths.get(i));
+        }
+        
+        JFreeChart chart = ChartFactory.createBarChart3D(
+                "Won/Lost in progressions",
+                "Year-Month",
+                "Amount of bets", 
+                dataSet, 
+                PlotOrientation.VERTICAL,
+                true, 
+                true, 
+                false);
+        
+        return chart;
+    }
+    
+     private JFreeChart setWonLostNotInProgBarChart()
+    {
+        DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+        
+        for(int i=0; i<yearsMonths.size(); i++)
+        {
+            dataSet.addValue(wonBetsByDateNotInProg.get(i), "Won", yearsMonths.get(i));
+            dataSet.addValue(lostBetsByDateNotInProg.get(i), "Lost", yearsMonths.get(i));
+        }
+        
+        JFreeChart chart = ChartFactory.createBarChart3D(
+                "Won/Lost not in progressions",
+                "Year-Month",
+                "Amount of bets", 
+                dataSet, 
+                PlotOrientation.VERTICAL,
+                true, 
+                true, 
+                false);
+        
         return chart;
     }
     
@@ -536,5 +669,79 @@ public class ChartsGenerator {
     public void setYieldNotInProg(LinkedList<Double> yieldNotInProg) 
     {
         this.yieldNotInProg = yieldNotInProg;
+    }
+
+    public LinkedList<String> getYearsMonths() 
+    {
+        return yearsMonths;
+    }
+
+    public void setYearsMonths(LinkedList<String> yearsMonths) 
+    {
+        this.yearsMonths = yearsMonths;
+    }
+
+    /**
+     * @return the wonBetsByDate
+     */
+    public LinkedList<Integer> getWonBetsByDate() {
+        return wonBetsByDate;
+    }
+
+    /**
+     * @param wonBetsByDate the wonBetsByDate to set
+     */
+    public void setWonBetsByDate(LinkedList<Integer> wonBetsByDate) {
+        this.wonBetsByDate = wonBetsByDate;
+    }
+
+    public LinkedList<Integer> getLostBetsByDate() 
+    {
+        return lostBetsByDate;
+    }
+
+    public void setLostBetsByDate(LinkedList<Integer> lostBetsByDate) 
+    {
+        this.lostBetsByDate = lostBetsByDate;
+    }
+
+    public LinkedList<Integer> getWonBetsByDateInProg() 
+    {
+        return wonBetsByDateInProg;
+    }
+
+    public void setWonBetsByDateInProg(LinkedList<Integer> wonBetsByDateInProg) 
+    {
+        this.wonBetsByDateInProg = wonBetsByDateInProg;
+    }
+
+    public LinkedList<Integer> getLostBetsByDateInProg() 
+    {
+        return lostBetsByDateInProg;
+    }
+
+    public void setLostBetsByDateInProg(LinkedList<Integer> lostBetsByDateInProg) 
+    {
+        this.lostBetsByDateInProg = lostBetsByDateInProg;
+    }
+
+    public LinkedList<Integer> getWonBetsByDateNotInProg() 
+    {
+        return wonBetsByDateNotInProg;
+    }
+
+    public void setWonBetsByDateNotInProg(LinkedList<Integer> wonBetsByDateNotInProg) 
+    {
+        this.wonBetsByDateNotInProg = wonBetsByDateNotInProg;
+    }
+
+    public LinkedList<Integer> getLostBetsByDateNotInProg() 
+    {
+        return lostBetsByDateNotInProg;
+    }
+
+    public void setLostBetsByDateNotInProg(LinkedList<Integer> lostBetsByDateNotInProg) 
+    {
+        this.lostBetsByDateNotInProg = lostBetsByDateNotInProg;
     }
 }

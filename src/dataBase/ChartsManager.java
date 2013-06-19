@@ -34,6 +34,9 @@ public class ChartsManager extends javax.swing.JPanel {
         jComboBoxChartType.addItem("Yield");
         jComboBoxChartType.addItem("Yield in progressions");
         jComboBoxChartType.addItem("Yield not in progressions");
+        jComboBoxChartType.addItem("Won/Lost by months");
+        jComboBoxChartType.addItem("Won/Lost in progressions by months");
+        jComboBoxChartType.addItem("Won/Lost not in progressions by months");
         
         jPanelChart.setLayout(new BorderLayout());       
     }
@@ -117,6 +120,15 @@ public class ChartsManager extends javax.swing.JPanel {
                 
                 if(jComboBoxChartType.getSelectedItem().toString().equals("Yield not in progressions"))
                     jPanelChart.add(chartsGenerator.drawYieldByDatesNotInProgChart(), BorderLayout.CENTER);
+                
+                if(jComboBoxChartType.getSelectedItem().toString().equals("Won/Lost by months"))
+                    jPanelChart.add(chartsGenerator.drawWonLostBarChart(), BorderLayout.CENTER);
+                
+                if(jComboBoxChartType.getSelectedItem().toString().equals("Won/Lost in progressions by months"))
+                    jPanelChart.add(chartsGenerator.drawWonLostInProgBarChart(), BorderLayout.CENTER);
+                
+                if(jComboBoxChartType.getSelectedItem().toString().equals("Won/Lost not in progressions by months"))
+                    jPanelChart.add(chartsGenerator.drawWonLostNotInProgBarChart(), BorderLayout.CENTER);
 
                 jPanelChart.validate();
             }

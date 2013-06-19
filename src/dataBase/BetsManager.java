@@ -19,8 +19,6 @@ import javax.swing.ListModel;
  * @author Marcin
  */
 public class BetsManager extends javax.swing.JPanel {
-
-
     
     private int betId = 0;
     private Bet selectedBet = null;
