@@ -27,8 +27,19 @@ public class ChartsGenerator {
     private int lostNotInProg = 0;
     
     private LinkedList<String> dates = new LinkedList<String>();
-    private LinkedList<Double> yield = new LinkedList<Double>();
     private LinkedList<Day> days = new LinkedList<Day>();
+    
+    private LinkedList<Double> wonBalance = new LinkedList<Double>();
+    private LinkedList<Double> stakesSum = new LinkedList<Double>();
+    private LinkedList<Double> yield = new LinkedList<Double>();
+    
+    private LinkedList<Double> wonBalanceInProg = new LinkedList<Double>();
+    private LinkedList<Double> stakeSumInProg = new LinkedList<Double>();
+    private LinkedList<Double> yieldInProg = new LinkedList<Double>();
+    
+    private LinkedList<Double> wonBalanceNotInProg = new LinkedList<Double>();
+    private LinkedList<Double> stakeSumNotInProg = new LinkedList<Double>();
+    private LinkedList<Double> yieldNotInProg = new LinkedList<Double>();
     
     public ChartsGenerator()
     {
@@ -39,7 +50,8 @@ public class ChartsGenerator {
         lostNotInProg = DataContainer.listModelLostBetsNotInProg.size();
         
         loadDataFromDB();
-        fillDays();      
+        fillDays();
+        fillListYield();
     }
     
     private Day getDate(String dateFromBD)
@@ -73,13 +85,112 @@ public class ChartsGenerator {
     private void loadDataFromDB()
     {
          DataContainer.dataFromDB.getQueryManager().viewDates(getDates());
-         double yieldValue = 0.0;
          
          for(String date : getDates())
          {
-             yieldValue = DataContainer.dataFromDB.getQueryManager().viewYield(date);
-             yield.add(yieldValue);
+             //wszystkie zaklady
+             double stakesSumByDate = DataContainer.dataFromDB.getQueryManager().viewAllStakesByDate(date);
+             double wonBalanceByDate = DataContainer.dataFromDB.getQueryManager().viewWonBalanceByDate(date);
+             
+             getStakesSum().add(stakesSumByDate);
+             getWonBalance().add(wonBalanceByDate);
+             
+             //zaklady w progresjach
+             double stakesSumByDateInProg = DataContainer.dataFromDB.getQueryManager().
+                     viewAllStakesByDateInProg(date);
+             double wonBalanceByDateInProg = DataContainer.dataFromDB.getQueryManager().
+                     viewWonBalanceByDateInProg(date);
+             
+             getStakeSumInProg().add(stakesSumByDateInProg);
+             getWonBalanceInProg().add(wonBalanceByDateInProg);
+             
+             //zaklady nie w progresjach
+             double stakesSumByDateNotInProg = DataContainer.dataFromDB.getQueryManager().
+                     viewAllStakesByDateNotInProg(date);
+             double wonBalanceByDateNotInProg = DataContainer.dataFromDB.getQueryManager().
+                     viewWonBalanceByDateNotInProg(date);
+             
+             stakeSumNotInProg.add(stakesSumByDateNotInProg);
+             wonBalanceNotInProg.add(wonBalanceByDateNotInProg);           
          }
+    }
+    
+    private void fillListYield()
+    {
+        double balance = 0;
+        double stake = 0;     
+        double balanceInProg = 0;
+        double stakeInProg = 0;
+        double balanceNotInProg = 0;
+        double stakeNotInProg = 0;      
+        
+        for(int i=0; i<days.size(); ++i)
+        {           
+            balance += wonBalance.get(i);
+            stake += stakesSum.get(i);
+            
+            balanceInProg += wonBalanceInProg.get(i);
+            stakeInProg += stakeSumInProg.get(i);
+            
+            balanceNotInProg += wonBalanceNotInProg.get(i);
+            stakeNotInProg += stakeSumNotInProg.get(i);
+            
+            //wszystkie zaklady
+            double yieldChange = ((balance - stake) / stake) * 100;
+            getYield().add(yieldChange);
+            
+            //zaklady w progresjach
+            double yieldChangeInProg = ((balanceInProg - stakeInProg) / 
+                    stakeInProg) * 100;
+            yieldInProg.add(yieldChangeInProg);
+            
+            //zaklady nie w progresjach
+            double yieldChangeNotInProg = ((balanceNotInProg - stakeNotInProg)
+                    / stakeNotInProg) * 100;
+            yieldNotInProg.add(yieldChangeNotInProg);
+        }
+    }
+    
+    private double countFinalYield()
+    {
+        double stake = 0;
+        double balance = 0;
+        
+        for(int i=0; i<days.size(); i++)
+        {
+            stake += stakesSum.get(i);
+            balance += wonBalance.get(i);
+        }
+        
+        return ((balance - stake) / stake) * 100;
+    }
+    
+    private double countFinalYieldNotInProg()
+    {
+        double stake = 0;
+        double balance = 0;
+        
+        for(int i=0; i<days.size(); i++)
+        {
+            stake += stakeSumNotInProg.get(i);
+            balance += wonBalanceNotInProg.get(i);
+        }
+        
+        return ((balance - stake) / stake) * 100;
+    }
+    
+    private double countFinalYieldInProg()
+    {
+        double stake = 0;
+        double balance = 0;
+        
+        for(int i=0; i<days.size(); i++)
+        {
+            stake += stakeSumInProg.get(i);
+            balance += wonBalanceInProg.get(i);
+        }
+        
+        return ((balance - stake) / stake) * 100;
     }
        
     public ChartPanel drawEfficiencyChart()
@@ -116,6 +227,24 @@ public class ChartsGenerator {
          cp.setPreferredSize(new Dimension(300, 300));
 
          return cp;         
+    }
+    
+    public ChartPanel drawYieldByDatesInProgChart()
+    {
+         JFreeChart chart = setYieldInProgTimeSeries();
+         ChartPanel cp = new ChartPanel(chart, false);
+         cp.setPreferredSize(new Dimension(300, 300));
+
+         return cp;
+    }
+    
+    public ChartPanel drawYieldByDatesNotInProgChart()
+    {
+         JFreeChart chart = setYieldNotInProgTimeSeries();
+         ChartPanel cp = new ChartPanel(chart, false);
+         cp.setPreferredSize(new Dimension(300, 300));
+
+         return cp;
     }
     
     private JFreeChart setEfficiencyChart()
@@ -176,7 +305,8 @@ public class ChartsGenerator {
     {
         TimeSeries series = new TimeSeries("Yield", Day.class);
         TimeSeries yieldFinal = new TimeSeries("Yield final", Day.class);
-        double yieldFinalValue = DataContainer.dataFromDB.getQueryManager().viewFinalYield();
+        
+        double yieldFinalValue = countFinalYield();
         
         for(int i=0; i<days.size(); ++i)
         {
@@ -190,6 +320,64 @@ public class ChartsGenerator {
         
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
             "Yield by date",
+            "Date",
+            "Yield in %",
+            dataset,
+            true,
+            true,
+            false);
+
+        return chart;
+    }
+    
+    private JFreeChart setYieldInProgTimeSeries()
+    {
+        TimeSeries series = new TimeSeries("Yield", Day.class);
+        TimeSeries yieldFinal = new TimeSeries("Yield final", Day.class);
+        
+        double yieldFinalValue = countFinalYieldInProg();
+        
+        for(int i=0; i<days.size(); ++i)
+        {
+            series.add(days.get(i), getYieldInProg().get(i));
+            yieldFinal.add(days.get(i), yieldFinalValue);
+        }
+      
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(series);
+        dataset.addSeries(yieldFinal);
+        
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            "Yield in progressions by date",
+            "Date",
+            "Yield in %",
+            dataset,
+            true,
+            true,
+            false);
+
+        return chart;
+    }
+    
+    private JFreeChart setYieldNotInProgTimeSeries()
+    {
+        TimeSeries series = new TimeSeries("Yield", Day.class);
+        TimeSeries yieldFinal = new TimeSeries("Yield final", Day.class);
+        
+        double yieldFinalValue = countFinalYieldNotInProg();
+        
+        for(int i=0; i<days.size(); ++i)
+        {
+            series.add(days.get(i), yieldNotInProg.get(i));
+            yieldFinal.add(days.get(i), yieldFinalValue);
+        }
+      
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(series);
+        dataset.addSeries(yieldFinal);
+        
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            "Yield in progressions by date",
             "Date",
             "Yield in %",
             dataset,
@@ -249,6 +437,36 @@ public class ChartsGenerator {
     {
         this.dates = dates;
     }
+    
+    public LinkedList<Day> getDays() 
+    {
+        return days;
+    }
+
+    public void setDays(LinkedList<Day> days) 
+    {
+        this.days = days;
+    }
+
+    public LinkedList<Double> getWonBalance() 
+    {
+        return wonBalance;
+    }
+
+    public void setWonBalance(LinkedList<Double> wonBalance) 
+    {
+        this.wonBalance = wonBalance;
+    }
+
+    public LinkedList<Double> getStakesSum() 
+    {
+        return stakesSum;
+    }
+
+    public void setStakesSum(LinkedList<Double> stakesSum) 
+    {
+        this.stakesSum = stakesSum;
+    }
 
     public LinkedList<Double> getYield() 
     {
@@ -260,13 +478,63 @@ public class ChartsGenerator {
         this.yield = yield;
     }
 
-    public LinkedList<Day> getDays() 
+    public LinkedList<Double> getWonBalanceInProg() 
     {
-        return days;
+        return wonBalanceInProg;
     }
 
-    public void setDays(LinkedList<Day> days) 
+    public void setWonBalanceInProg(LinkedList<Double> wonBalanceInProg) 
     {
-        this.days = days;
+        this.wonBalanceInProg = wonBalanceInProg;
+    }
+
+    public LinkedList<Double> getStakeSumInProg() 
+    {
+        return stakeSumInProg;
+    }
+
+    public void setStakeSumInProg(LinkedList<Double> stakeSumInProg) 
+    {
+        this.stakeSumInProg = stakeSumInProg;
+    }
+
+    public LinkedList<Double> getYieldInProg() 
+    {
+        return yieldInProg;
+    }
+
+    public void setYieldInProg(LinkedList<Double> yieldInProg) 
+    {
+        this.yieldInProg = yieldInProg;
+    }
+    
+    public LinkedList<Double> getWonBalanceNotInProg() 
+    {
+        return wonBalanceNotInProg;
+    }
+
+    public void setWonBalanceNotInProg(LinkedList<Double> wonBalanceNotInProg) 
+    {
+        this.wonBalanceNotInProg = wonBalanceNotInProg;
+    }
+
+    public LinkedList<Double> getStakeSumNotInProg() 
+    {
+        return stakeSumNotInProg;
+    }
+
+    public void setStakeSumNotInProg(LinkedList<Double> stakeSumNotInProg) 
+    {
+        this.stakeSumNotInProg = stakeSumNotInProg;
+    }
+
+    public LinkedList<Double> getYieldNotInProg() 
+    {
+        return yieldNotInProg;
+    }
+
+    public void setYieldNotInProg(LinkedList<Double> yieldNotInProg) 
+    {
+        this.yieldNotInProg = yieldNotInProg;
     }
 }

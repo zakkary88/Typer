@@ -59,11 +59,14 @@ public class QueryManager {
     private PreparedStatement viewResolvedBetInProgInfoStmt = null;
     
     private PreparedStatement viewResolvedProgressionBalanceStmt = null;
-    private PreparedStatement viewYieldStmt = null;
-    private PreparedStatement viewYieldInProgressionsStmt = null;
-    private PreparedStatement viewYieldNotInProgsStmt = null;
     private PreparedStatement viewDatesStmt =  null;
-    private PreparedStatement viewFinalYieldStmt = null;
+        
+    private PreparedStatement viewWonBalanceByDateStmt = null;
+    private PreparedStatement viewAllStakesSumByDateStmt = null;
+    private PreparedStatement viewWonBalanceByDateInProgStmt = null;
+    private PreparedStatement viewAllStakesSumByDateInProgStmt = null;
+    private PreparedStatement viewWonBalanceByDateNotInProgStmt = null;
+    private PreparedStatement viewAllStakesSumByDateNotInProgStmt = null; 
     
     private PreparedStatement viewTodayBetsStmt = null;
     private PreparedStatement viewEndedBetsToUpdateStmt = null; 
@@ -186,22 +189,27 @@ public class QueryManager {
     
     //suma wszystkich wynikow (wygrana - stawka) / stawka * 100 w zakonczonych zakladach
     //data w formacie YYYY-MM-DD
-    private static final String viewYieldQuery = "SELECT "
-            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
-            + "WHERE b.Status IN (2,3) AND SUBSTR(b.Date,0,11) = ?";
-    private static final String viewYieldInProgressionsQuery = "SELECT "
-            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
-            + "WHERE b.Status IN (2,3) AND b.PartOfProgression NOT LIKE 0 AND "
-            + "SUBSTR(b.Date,0,11) = ?";
-    private static final String viewYieldNotInProgQuery = "SELECT "
-            + "SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
-            + "WHERE b.Status IN (2,3) AND b.PartOfProgression = 0 "
-            + "SUBSTR(b.Date,0,11) = ?";
     private static final String viewDatesQuery = 
             "SELECT DISTINCT SUBSTR(b.Date,0,11) FROM Bets b";
-    private static final String viewFinalYieldQuery = 
-            "SELECT SUM((b.Balance  - b.Stake) / b.Stake) * 100 AS Yield FROM Bets b "
-            + "WHERE b.Status IN (2,3)";
+    
+    private static final String viewWonBalanceByDateQuery =
+            "SELECT SUM(b.Balance) FROM Bets b WHERE b.Status = 2 "
+            + "AND SUBSTR(b.Date,0,11) = ?";
+    private static final String viewAllStakesSumByDateQuery =
+            "SELECT SUM(b.Stake) FROM Bets b WHERE b.Status IN (2,3) "
+            + "AND SUBSTR(b.Date,0,11) = ?";
+    private static final String viewWonBalanceByDateInProgQuery =
+            "SELECT SUM(b.Balance) FROM Bets b WHERE b.Status = 2 "
+            + "AND b.PartOfProgression NOT LIKE 0 AND SUBSTR(b.Date,0,11) = ?";
+    private static final String viewAllStakesSumByDateInProgQuery =
+            "SELECT SUM(b.Stake) FROM Bets b WHERE b.Status IN (2,3) "
+            + "AND b.PartOfProgression NOT LIKE 0 AND SUBSTR(b.Date,0,11) = ?";
+    private static final String viewWonBalanceByDateNotInProgQuery = 
+            "SELECT SUM(b.Balance) FROM Bets b WHERE b.Status = 2 "
+            + "AND b.PartOfProgression = 0 AND SUBSTR(b.Date,0,11) = ?";
+    private static final String viewAllStakesSumByDateNotInProgQuery = 
+            "SELECT SUM(b.Stake) FROM Bets b WHERE b.Status IN (2,3) "
+            + "AND b.PartOfProgression = 0 AND SUBSTR(b.Date,0,11) = ?";
     
     //zapytania dotyczące daty
     private static final String viewTodayBetsQuery = "SELECT * FROM Bets WHERE "
@@ -1449,93 +1457,137 @@ public class QueryManager {
             return "BetInProgression Error";
         }
     }
-    
-    public double viewFinalYield()
-    {
-        try
-        {
-            if(viewFinalYieldStmt == null)
-                viewFinalYieldStmt = conn.prepareStatement(viewFinalYieldQuery);
-
-            resultSet = viewFinalYieldStmt.executeQuery();
-            double result = resultSet.getDouble(1);
-
-            resultSet.close();
-            return result;
-        }
-        catch(SQLException e)
-        {
-            for(Throwable t : e)
-                System.out.println(t.getMessage());
-            return -1;
-        }
-    }
-    
-    public double viewYield(String yearMonth)
-    {
-        try
-        {
-            if(viewYieldStmt == null)
-                viewYieldStmt = conn.prepareStatement(viewYieldQuery);
-            
-            viewYieldStmt.setString(1, yearMonth);
-            resultSet = viewYieldStmt.executeQuery();
-            double result = resultSet.getDouble(1);
-            
-            resultSet.close();
-            return result;
-        }
-        catch(SQLException e)
-        {
-            for(Throwable t : e)
-                System.out.println(t.getMessage());
-            return -1;
-        }      
-    }
-    
-    public double viewYieldInProgressions(String yearMonth)
-    {
-        try
-        {
-            if(viewYieldInProgressionsStmt == null)
-                viewYieldInProgressionsStmt = conn.prepareStatement(viewYieldInProgressionsQuery);
-            
-            viewYieldInProgressionsStmt.setString(1, yearMonth);
-            resultSet = viewYieldInProgressionsStmt.executeQuery();
-            double result = resultSet.getDouble(1);
-            
-            resultSet.close();
-            return result;
-        }
-        catch(SQLException e)
-        {
-            for(Throwable t : e)
-                System.out.println(t.getMessage());
-            return -1;
-        }    
-    }
-    
-    public double viewYieldNotInProgs(String yearMonth)
-    {
-        try
-        {
-            if(viewYieldNotInProgsStmt == null)
-                viewYieldNotInProgsStmt = conn.prepareStatement(viewYieldNotInProgQuery);
-            
-            viewYieldNotInProgsStmt.setString(1, yearMonth);
-            resultSet = viewYieldNotInProgsStmt.executeQuery();
-            double result = resultSet.getDouble(1);
-            
-            resultSet.close();
-            return result;
-        }
-        catch(SQLException e)
-        {
-            for(Throwable t : e)
-                System.out.println(t.getMessage());
-            return -1;
-        }
         
+    public double viewWonBalanceByDate(String date)
+    {
+        try
+        {
+            if(viewWonBalanceByDateStmt == null)
+                viewWonBalanceByDateStmt = conn.prepareStatement(viewWonBalanceByDateQuery);
+            
+            viewWonBalanceByDateStmt.setString(1, date);
+            resultSet = viewWonBalanceByDateStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    
+    public double viewAllStakesByDate(String date)
+    {
+        try
+        {
+            if(viewAllStakesSumByDateStmt == null)
+                viewAllStakesSumByDateStmt = conn.prepareStatement(viewAllStakesSumByDateQuery);
+            
+            viewAllStakesSumByDateStmt.setString(1, date);
+            resultSet = viewAllStakesSumByDateStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    
+    public double viewWonBalanceByDateInProg(String date)
+    {
+        try
+        {
+            if(viewWonBalanceByDateInProgStmt == null)
+                viewWonBalanceByDateInProgStmt = conn.prepareStatement(viewWonBalanceByDateInProgQuery);
+            
+            viewWonBalanceByDateInProgStmt.setString(1, date);
+            resultSet = viewWonBalanceByDateInProgStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    
+    public double viewAllStakesByDateInProg(String date)
+    {
+        try
+        {
+            if(viewAllStakesSumByDateInProgStmt == null)
+                viewAllStakesSumByDateInProgStmt = conn.prepareStatement(viewAllStakesSumByDateInProgQuery);
+            
+            viewAllStakesSumByDateInProgStmt.setString(1, date);
+            resultSet = viewAllStakesSumByDateInProgStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    
+    public double viewWonBalanceByDateNotInProg(String date)
+    {
+        try
+        {
+            if(viewWonBalanceByDateNotInProgStmt == null)
+                viewWonBalanceByDateNotInProgStmt = conn.prepareStatement(viewWonBalanceByDateNotInProgQuery);
+            
+            viewWonBalanceByDateNotInProgStmt.setString(1, date);
+            resultSet = viewWonBalanceByDateNotInProgStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    
+    public double viewAllStakesByDateNotInProg(String date)
+    {
+        try
+        {
+            if(viewAllStakesSumByDateNotInProgStmt == null)
+                viewAllStakesSumByDateNotInProgStmt = conn.prepareStatement(viewAllStakesSumByDateNotInProgQuery);
+            
+            viewAllStakesSumByDateNotInProgStmt.setString(1, date);
+            resultSet = viewAllStakesSumByDateNotInProgStmt.executeQuery();
+            double result = resultSet.getDouble(1);
+            
+            resultSet.close();
+            return result;
+        }
+        catch(SQLException e)
+        {
+            for(Throwable t : e)
+                System.out.println(e.getMessage());
+            return -1;
+        }
     }
     
     public double viewResolvedProgressionBalance(int id)

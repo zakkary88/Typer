@@ -111,6 +111,12 @@ public class ChartsManager extends javax.swing.JPanel {
         
                 if(jComboBoxChartType.getSelectedItem().toString().equals("Yield"))
                     jPanelChart.add(chartsGenerator.drawYieldByDatesChart(), BorderLayout.CENTER);
+                
+                if(jComboBoxChartType.getSelectedItem().toString().equals("Yield in progressions"))
+                    jPanelChart.add(chartsGenerator.drawYieldByDatesInProgChart(), BorderLayout.CENTER);
+                
+                if(jComboBoxChartType.getSelectedItem().toString().equals("Yield not in progressions"))
+                    jPanelChart.add(chartsGenerator.drawYieldByDatesNotInProgChart(), BorderLayout.CENTER);
 
                 jPanelChart.validate();
             }
